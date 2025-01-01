@@ -14,12 +14,12 @@ export class AudioHandler {
     const audioLoader = new AudioLoader();
     audioLoader.load("/assets/audio/miss.ogg", (buffer) => {
       this.miss.setBuffer(buffer);
-      this.miss.setVolume(0.4);
+      this.miss.setVolume(0.1);
     });
 
     audioLoader.load("/assets/audio/hit.ogg", (buffer) => {
       this.hit.setBuffer(buffer);
-      this.hit.setVolume(0.3);
+      this.hit.setVolume(0.2);
     });
   }
 

@@ -1,4 +1,4 @@
-import { Camera, Controls, Euler, Quaternion, Vector3 } from "three";
+import { Camera, Euler, Quaternion, Vector3 } from "three";
 import { calculateSensitivityByCmPer360 } from "./maths/sensitivity";
 
 const PI_2 = Math.PI / 2;
@@ -20,7 +20,7 @@ export class AimControls {
   private minPolarAngle = 0;
   private maxPolarAngle = Math.PI;
   private euler = new Euler(0, 0, 0, "YXZ");
-  private mouseSensitivity = calculateSensitivityByCmPer360(40, 800);
+  private mouseSensitivity = calculateSensitivityByCmPer360(25, 800);
   private clickEventQueue: ClickEvent[] = [];
   private mouseDown = false;
 

@@ -189,8 +189,10 @@ export class Game {
         this.shooting = false;
       }
       if (event?.eventType === ClickEventType.CLICK) {
-        this.shooting = true;
         this.shotAccumulator = 1 / this.bulletsPerSecond;
+        if (this.bulletsPerSecond > 0) {
+          this.shooting = true;
+        }
         if (this.bulletsPerSecond === 0) {
           this.raycastCam.position.copy(event.cameraPosition);
           this.raycastCam.quaternion.copy(event.cameraQuaternion);

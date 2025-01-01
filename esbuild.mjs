@@ -7,6 +7,9 @@ const options = {
   minify: true,
   outfile: "static/.build/main.js",
   external: ["path", "fs", "child_process", "crypto", "url", "module"],
+  loader: {
+    ".lua": "text",
+  },
 };
 
 (async () => {

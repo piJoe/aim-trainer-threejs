@@ -1,7 +1,7 @@
 local gameConfig = {
   roomSize = { x = 8, y = 4, z = 6 },  -- set room size to be 8x5m at 2m height
   cameraPos = { x = 0, y = 0, z = 2 }, -- set camera position at center, near the back wall
-  bulletsPerMinute = 900,              -- anything above activates rifle mode
+  bulletsPerMinute = 900,              -- anything above 0 activates rifle mode
   timer = 60,                          -- in seconds
 }
 
@@ -10,33 +10,24 @@ local function randomFloat(min, max)
 end
 
 local function spawnRandomTarget()
-  SpawnTarget({
-    size = { radius = 0.09, height = 0.04 },
-    hp = 10,
+  spawnTarget({
+    size = { radius = 0.11, height = 0.03 },
+    hp = 1,
     position = {
       x = randomFloat(-3.8, 3.8),
       y = randomFloat(-1.75, 1.5),
-      z = randomFloat(-2.8, -0.5),
+      z = randomFloat(-0.5, -2.8),
     },
-    movement = {
-      strategy = "linear",
-      velocity = { x = 0.9, y = 0.0, z = 0.0 },
-      boundingBox = {
-        min = { x = -3.8, y = -1.75, z = -2.8 },
-        max = { x = 3.8, y = 1.5, z = -0.5 },
-      },
-      changeDirectionChance = randomFloat(0.4, 0.8),
-      changeDirectionCooldown = randomFloat(0.3, 0.7),
-    },
+    onUpdate = function() end,
     onDeath = spawnRandomTarget
   })
 end
 
-function Setup()
+function setup()
   return gameConfig
 end
 
-function OnInit()
+function onInit()
   -- Spawn 5 static targets at random positions
   for i = 1, 5 do
     spawnRandomTarget()

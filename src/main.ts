@@ -1,19 +1,19 @@
 import { AimControls } from "./aim-controls";
 import { Crosshair } from "./crosshair";
-import { Pill } from "./game-objects/pill";
 import { Game } from "./game";
 import { LuaFactory } from "wasmoon";
-import { calculateSensitivityByCmPer360 } from "./maths/sensitivity";
 import {
   Clock,
   OrthographicCamera,
   PerspectiveCamera,
   Raycaster,
   Scene,
-  Vector3,
   WebGLRenderer,
 } from "three";
 import { AudioHandler } from "./audio";
+
+// lua imports (handled by esbuild)
+import luaScenarioRuntime from "./lua/scenario-runtime.lua";
 
 const scene = new Scene();
 const hfov = 103;
@@ -57,13 +57,211 @@ const audio = new AudioHandler(camera);
 
 async function testLuaScript() {
   const factory = new LuaFactory("/.build/glue.wasm");
-  const lua = await factory.createEngine();
+  const lua = await factory.createEngine({
+    // openStandardLibs: false,
+    injectObjects: false,
+    enableProxy: false,
+    traceAllocations: true,
+  });
   try {
     lua.global.set("spawnTarget", ({ ...opts }) => {
       console.log("spawnTarget", opts);
     });
 
-    const luaStr = await (await fetch("/examples/tracking-simple.lua")).text();
+    // benchmark test
+    const benchmark = async () => {
+      // Load Lua script
+      await lua.doString(`
+    globalTargets = {}
+
+    function spawnTarget(i)
+        target = {
+          position = {x = i, y = i, z = i}, 
+          velocity = {x = 0.1, y = 0.2, z = 0.3},
+          boundingBox = {min = {x = 0, y = 0, z = 0}, max = {x = 100, y = 100, z = 100}},
+          update = function(self)
+            updateTarget(self, self.boundingBox)
+          end,
+          updateCB = function(self)
+            updateTarget(self, self.boundingBox)
+            updateTargetJS(self.position, self.velocity)
+          end,
+          updateCBFlat = function(self)
+            updateTarget(self, self.boundingBox)
+            -- updateTargetJSFlat(self.position.x, self.position.y, self.position.z, self.velocity.x, self.velocity.y, self.velocity.z)
+            -- updateTargetJSFlat(self.position.x .. "/" .. self.position.y .. "/" .. self.position.z .. "/" .. self.velocity.x .. "/" .. self.velocity.y .. "/" .. self.velocity.z)
+            updateTargetJSFlat("{\\"position\\": {\\"x\\": " .. self.position.x .. ",\\"y\\": " .. self.position.y .. ",\\"z\\": " .. self.position.z .. "}, \\"velocity\\": {\\"x\\": " .. self.velocity.x .. ",\\"y\\": " .. self.velocity.y .. ",\\"z\\": " .. self.velocity.z .. "}}")
+          end
+        }
+        table.insert(globalTargets, target)
+        -- return target    
+    end
+
+    -- Lua functions as defined earlier
+    function updateTarget(target, boundingBox)
+        target.position.x = target.position.x + target.velocity.x
+        target.position.y = target.position.y + target.velocity.y
+        target.position.z = target.position.z + target.velocity.z
+
+        -- Constrain within bounding box
+        if target.position.x < boundingBox.min.x then target.position.x = boundingBox.min.x end
+        if target.position.x > boundingBox.max.x then target.position.x = boundingBox.max.x end
+
+        if target.position.y < boundingBox.min.y then target.position.y = boundingBox.min.y end
+        if target.position.y > boundingBox.max.y then target.position.y = boundingBox.max.y end
+
+        if target.position.z < boundingBox.min.z then target.position.z = boundingBox.min.z end
+        if target.position.z > boundingBox.max.z then target.position.z = boundingBox.max.z end
+
+        return target
+    end
+
+    function updateTargets(targets, boundingBox)
+        for i, target in ipairs(targets) do
+            target = updateTarget(target, boundingBox)
+        end
+        return targets
+    end
+
+    function batchUpdateTargets()
+        targets = {}
+        for i, target in ipairs(globalTargets) do
+          target:update()
+          table.insert(targets, {position= target.position, velocity= target.velocity})
+        end
+        return targets
+    end
+    
+    function batchUpdateTargetsWithCallback()
+        for i, target in ipairs(globalTargets) do
+          target:updateCB()
+        end
+    end
+
+    function batchUpdateTargetsWithCallbackFlat()
+        for i, target in ipairs(globalTargets) do
+          target:updateCBFlat()
+        end
+    end
+    
+    function batchUpdateJSON()
+        json = "["
+        for i, target in ipairs(globalTargets) do
+          target:update()
+          json = json .. "{\\"position\\": {\\"x\\": " .. target.position.x .. ",\\"y\\": " .. target.position.y .. ",\\"z\\": " .. target.position.z .. "}, \\"velocity\\": {\\"x\\": " .. target.velocity.x .. ",\\"y\\": " .. target.velocity.y .. ",\\"z\\": " .. target.velocity.z .. "}},"
+        end
+        json = json:sub(1, -2) .. "]"
+        return json
+    end
+    
+    function getGlobalTargets()
+        return globalTargets
+    end
+`);
+
+      // Create targets and bounding box
+      let targets = Array.from({ length: 20 }, (_, i) => ({
+        position: { x: i, y: i, z: i },
+        velocity: { x: 0.1, y: 0.2, z: 0.3 },
+      }));
+
+      const boundingBox = {
+        min: { x: 0, y: 0, z: 0 },
+        max: { x: 100, y: 100, z: 100 },
+      };
+
+      // Benchmark helper
+      function measure(label: any, callback: any) {
+        const start = performance.now();
+        callback();
+        const end = performance.now();
+        console.log(`${label}: ${(end - start).toFixed(4)} ms`);
+      }
+
+      // Benchmark single calls
+      const updateTarget = lua.global.get("updateTarget");
+      measure("Single Target Updates", () => {
+        targets = targets.map((target) => {
+          return updateTarget(target, boundingBox);
+        });
+      });
+
+      // Benchmark batch updates
+      const updateTargets = lua.global.get("updateTargets");
+      measure("Batch Target Updates", () => {
+        targets = updateTargets(targets, boundingBox);
+      });
+
+      console.log(targets);
+
+      // Benchmark handing inside lua
+      const spawn = lua.global.get("spawnTarget");
+      measure("spawn targets", () => {
+        const luaTargets = Array.from({ length: 50 }, (_, i) => spawn(i));
+      });
+      const globalTargets = lua.global.get("getGlobalTargets");
+
+      const batchupdate = lua.global.get("batchUpdateTargets");
+      let t = null;
+      measure("Batch call global table", () => {
+        for (let i = 0; i < 10; i++) {
+          t = batchupdate();
+        }
+      });
+      console.log(t);
+
+      const alltargets: any[] = [];
+      lua.global.set("updateTargetJS", (position, velocity) => {
+        // do nothing for now
+        alltargets.push({
+          pos: position,
+          vel: velocity,
+        });
+      });
+
+      lua.global.set("updateTargetJSFlat", (json) => {
+        // do nothing for now
+        alltargets.push(JSON.parse(json));
+      });
+
+      const batchupdateCB = lua.global.get("batchUpdateTargetsWithCallback");
+      measure("Batch call global table with Callbacks", () => {
+        for (let i = 0; i < 1_000; i++) {
+          batchupdateCB();
+        }
+      });
+
+      const batchupdateCBFlat = lua.global.get(
+        "batchUpdateTargetsWithCallbackFlat"
+      );
+      measure("Batch call global table with Callbacks Flat", () => {
+        for (let i = 0; i < 1_000; i++) {
+          batchupdateCBFlat();
+        }
+      });
+      console.log(alltargets);
+
+      const batchupdateJSON = lua.global.get("batchUpdateJSON");
+      measure("Batch call global table", () => {
+        for (let i = 0; i < 1_000; i++) {
+          t = batchupdateJSON();
+        }
+      });
+      console.log(t);
+    };
+    // await benchmark();
+
+    // our new and shiny sandboxed scenario runtime
+    try {
+      const executeScenario = await lua.doString(luaScenarioRuntime);
+      const res = executeScenario({}, `print("BLA BLA")`);
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
+
+    return;
+    const luaStr = await (await fetch("/examples/movement-test.lua")).text();
 
     const script = await lua.doString(luaStr);
     const config = script.setup();
