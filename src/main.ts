@@ -8,12 +8,14 @@ import {
   PerspectiveCamera,
   Raycaster,
   Scene,
+  TextureLoader,
   WebGLRenderer,
 } from "three";
 import { AudioHandler } from "./audio";
 
 // lua imports (handled by esbuild)
 import luaScenarioRuntime from "./lua/scenario-runtime.lua";
+import { runLuaScenario } from "./luaScenario";
 
 const scene = new Scene();
 const hfov = 103;
@@ -61,7 +63,6 @@ async function testLuaScript() {
     // openStandardLibs: false,
     injectObjects: false,
     enableProxy: false,
-    traceAllocations: true,
   });
   try {
     lua.global.set("spawnTarget", ({ ...opts }) => {
@@ -254,8 +255,20 @@ async function testLuaScript() {
     // our new and shiny sandboxed scenario runtime
     try {
       const executeScenario = await lua.doString(luaScenarioRuntime);
-      const res = executeScenario({}, `print("BLA BLA")`);
-      console.log(res);
+      const calls = {
+        createTarget: null,
+        updateTarget: null,
+        setRoomSize: null,
+        setCameraPosition: null,
+        setWeaponRPM: null,
+        setTimer: null,
+      };
+      const handlers = executeScenario(calls, `print("BLA BLA")`);
+      // grab following from handlers:
+      // handleDeath
+      // handleTargetHit
+      // handleInit
+      // handleUpdate
     } catch (e) {
       console.log(e);
     }
@@ -291,7 +304,7 @@ async function testLuaScript() {
         return;
       }
 
-      game.update(elapsedTime, delta);
+      game.onTick(elapsedTime, delta);
 
       renderer.clear();
       renderer.render(scene, camera);
@@ -306,4 +319,47 @@ async function testLuaScript() {
     // lua.global.close();
   }
 }
-testLuaScript();
+// testLuaScript();
+
+(async () => {
+  const game = new Game(controls, audio);
+  const luaCalls = game.getLuaCalls();
+  const handlers = await runLuaScenario(
+    luaCalls,
+    `
+    function onInit()
+      setupRoom(4, 4, 3)
+      setCameraPosition(0, 0, 1.5)
+      spawnTarget({
+        size = {radius = 0.12, height = 0},
+        position = {x = 1.25, y = 1, z = -1.0},
+      })
+    end
+  `
+  );
+
+  // handle init on lua side, then setup game
+  handlers.handleInit();
+  const { scene, camera } = await game.setup();
+
+  const clock = new Clock();
+  let firstFrame = true;
+  function render() {
+    const elapsedTime = clock.elapsedTime;
+    const delta = clock.getDelta();
+    if (!controls.isLocked && !firstFrame) {
+      return;
+    }
+
+    game.onTick(elapsedTime, delta);
+
+    renderer.clear();
+    renderer.render(scene, camera);
+    renderer.clearDepth();
+    renderer.render(overlayScene, overlayCamera);
+
+    firstFrame = false;
+  }
+  scene.updateMatrixWorld();
+  renderer.setAnimationLoop(render);
+})();

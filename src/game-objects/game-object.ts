@@ -1,7 +1,9 @@
 import { Mesh, Object3D, Raycaster } from "three";
 import { Game } from "../game";
+let objectIdCounter = 0;
 
 export abstract class GameObject {
+  public id = objectIdCounter++;
   protected mesh: Mesh;
   protected isDestroyed = false;
 
@@ -18,7 +20,7 @@ export abstract class GameObject {
     this.mesh.geometry.dispose();
   }
 
-  public update(elapseTime: number, delta: number) {}
+  public onTick(elapseTime: number, delta: number) {}
 
   public addObjectToParent(parent: Object3D) {
     parent.add(this.mesh);

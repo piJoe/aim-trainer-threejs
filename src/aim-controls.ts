@@ -43,6 +43,10 @@ export class AimControls {
     );
   }
 
+  setCamera(camera: Camera) {
+    this.camera = camera;
+  }
+
   onPointerRawEvent(event: PointerEvent) {
     if (!this.isLocked) return;
 

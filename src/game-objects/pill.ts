@@ -76,7 +76,7 @@ export class Pill extends GameObject {
     this.updateLabel();
   }
 
-  update(elapsedTime: number, delta: number) {
+  onTick(elapsedTime: number, delta: number) {
     if (this.game.castRay(this.mesh)) {
       this.mesh.material = HIT_MATERIAL;
       this.hits.push(1);

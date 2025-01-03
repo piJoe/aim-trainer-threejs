@@ -16,14 +16,14 @@ function TargetManager.addTarget(config)
         id = id,
         size = config.size or { radius = 0.09, height = 0.04 },
         position = config.position or { x = 0, y = 0, z = 0 },
-        velocity = config.velocity or { x = 0, y = 0, z = 0 },
         maxHP = config.hp or 1,
         hp = config.hp or 1,
-        onUpdate = config.onUpdate,
-        onDeath = config.onDeath
+        onTick = config.onTick,
+        onDeath = config.onDeath,
+        onHit = config.onHit,
     }
 
-    TargetManager.updateTarget(target)
+    TargetManager.setupTarget(target)
     targets[target.id] = target
 
     function target:setSize(radius, height)
@@ -54,19 +54,27 @@ function TargetManager.removeTarget(targetId)
 end
 
 -- internal methods
-function TargetManager.updateTarget(target)
-    __js_calls.updateTarget(target.id,
+function TargetManager.setupTarget(target)
+    __js_calls.setupTarget(target.id,
         -- size
         target.size.radius,
         target.size.height,
-
         -- position
         target.position.x,
         target.position.y,
         target.position.z,
-
         -- hp
         target.maxHP,
+        target.hp)
+end
+
+function TargetManager.updateTarget(target)
+    __js_calls.updateTarget(target.id,
+        -- position
+        target.position.x,
+        target.position.y,
+        target.position.z,
+        -- hp
         target.hp)
 end
 
@@ -91,14 +99,14 @@ function __fromjs.handleTargetHit(targetId)
     end
 end
 
-function __fromjs.handleUpdate(elapsed, delta)
+function __fromjs.handleTick(elapsed, delta)
     -- if onUpdate then
     --     onUpdate(elapsed, delta)
     -- end
     for _, target in pairs(targets) do
-        if target.onUpdate then
-            target:onUpdate(elapsed, delta)
-            -- __internal_handleMove(target, delta)
+        -- TODO: rename to onTick or sth?
+        if target.onTick then
+            target:onTick(elapsed, delta)
             TargetManager.updateTarget(target)
         end
     end
@@ -148,7 +156,10 @@ end
 
 local function executeUserScenario(jsCalls, scenarioCode)
     __js_calls = jsCalls
-    local userScenario = load(scenarioCode, nil, 't', userScenarioEnv)
+    local userScenario, err = load(scenarioCode, nil, 't', userScenarioEnv)
+    if err then
+        print(err)
+    end
     if userScenario then
         userScenario()
     end

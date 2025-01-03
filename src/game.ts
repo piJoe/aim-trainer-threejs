@@ -1,9 +1,9 @@
 import {
   AmbientLight,
-  Camera,
   DirectionalLight,
   Mesh,
   MeshStandardMaterial,
+  PerspectiveCamera,
   PlaneGeometry,
   Raycaster,
   Scene,
@@ -14,6 +14,7 @@ import { loadTexture } from "./texture";
 import { Target } from "./game-objects/target";
 import { AimControls, ClickEventType } from "./aim-controls";
 import { AudioHandler } from "./audio";
+import { getAspectRatio, getFov } from "./settings";
 
 interface GameConfig {
   roomSize: { x: number; y: number; z: number };
@@ -49,7 +50,20 @@ export interface TargetConfig {
 }
 
 export class Game {
-  targets: Target[] = [];
+  private scene = new Scene();
+  private camera = new PerspectiveCamera(getFov(), getAspectRatio(), 0.1, 1000);
+  private raycastCam = this.camera.clone();
+  private raycaster = new Raycaster();
+
+  private gameConfig: GameConfig = {
+    roomSize: { x: 8, y: 4, z: 6 },
+    cameraPos: { x: 0, y: 0, z: 2 },
+    bulletsPerMinute: 0,
+    timer: 60,
+  };
+
+  // targets: Target[] = [];
+  targets: Map<number, Target> = new Map();
   private targetsToAdd: Target[] = [];
   private targetsToRemove: Target[] = [];
   private fpsHistory: number[] = [];
@@ -61,15 +75,37 @@ export class Game {
   private shooting = false;
 
   constructor(
-    public camera: Camera,
-    private raycastCam: Camera,
-    private scene: Scene,
-    private raycaster: Raycaster,
     private controls: AimControls,
     private audioHandler: AudioHandler
-  ) {}
+  ) {
+    this.controls.setCamera(this.camera);
+  }
 
-  async setup(gameConfig: GameConfig) {
+  getLuaCalls() {
+    return {
+      createTarget: this.createTarget.bind(this),
+      setupTarget: this.setupTarget.bind(this),
+      updateTarget: this.updateTarget.bind(this),
+      setRoomSize: this.setRoomSize.bind(this),
+      setCameraPosition: this.setCameraPosition.bind(this),
+      setWeaponRPM: () => {},
+      setTimer: () => {},
+    };
+  }
+
+  setRoomSize(width: number, length: number, height: number) {
+    this.gameConfig.roomSize.x = width;
+    this.gameConfig.roomSize.y = height;
+    this.gameConfig.roomSize.z = length;
+  }
+
+  setCameraPosition(x: number, y: number, z: number) {
+    this.gameConfig.cameraPos.x = x;
+    this.gameConfig.cameraPos.y = y;
+    this.gameConfig.cameraPos.z = z;
+  }
+
+  async setup() {
     const floorTexture = await loadTexture(
       "assets/textures/dark/texture_04.png"
     );
@@ -110,7 +146,7 @@ export class Game {
       return new Mesh(wall, isFloor ? floorMaterial : wallMaterial);
     };
 
-    const roomSize = gameConfig.roomSize;
+    const roomSize = this.gameConfig.roomSize;
     const walls = [
       createWall(roomSize.x, roomSize.y, 0, 0, -roomSize.z / 2, 0), // front wall
       createWall(roomSize.x, roomSize.y, 0, 0, roomSize.z / 2, 0, Math.PI), // back wall
@@ -154,17 +190,19 @@ export class Game {
     this.scene.add(ambientLight);
 
     this.camera.position.set(
-      gameConfig.cameraPos.x,
-      gameConfig.cameraPos.y,
-      gameConfig.cameraPos.z
+      this.gameConfig.cameraPos.x,
+      this.gameConfig.cameraPos.y,
+      this.gameConfig.cameraPos.z
     );
 
-    this.bulletsPerSecond = (gameConfig.bulletsPerMinute ?? 0) / 60;
+    this.bulletsPerSecond = (this.gameConfig.bulletsPerMinute ?? 0) / 60;
+
+    return { scene: this.scene, camera: this.camera };
   }
 
   performShot() {
     const targetsHit = [];
-    for (const target of this.targets) {
+    for (const target of this.targets.values()) {
       const intersection = target.castRay(this.raycaster);
       if (intersection.length > 0) {
         targetsHit.push({
@@ -216,44 +254,67 @@ export class Game {
     }
   }
 
-  update(elapsedTime: number, delta: number) {
+  onTick(elapsedTime: number, delta: number) {
     this.updateAverageFps(delta);
 
     this.updateControlEvents(delta);
 
-    for (const target of this.targets) {
-      target.update(elapsedTime, delta);
+    for (const target of this.targets.values()) {
+      target.onTick(elapsedTime, delta);
     }
 
-    this.targets = this.targets.filter((object) => {
-      return !this.targetsToRemove.includes(object);
+    this.targetsToRemove.forEach((target) => {
+      this.targets.delete(target.id);
+      target.removeObjectFromParent(this.scene);
     });
     this.targetsToRemove = [];
 
-    for (const object of this.targetsToAdd) {
-      object.addObjectToParent(this.scene);
-      this.targets.push(object);
+    for (const target of this.targetsToAdd) {
+      target.addObjectToParent(this.scene);
+      this.targets.set(target.id, target);
     }
     this.targetsToAdd = [];
   }
 
-  spawnTarget(targetConfig: TargetConfig) {
-    const target = new Target(
-      this,
-      targetConfig.size.radius,
-      targetConfig.size.height,
-      new Vector3(
-        targetConfig.position.x,
-        targetConfig.position.y,
-        targetConfig.position.z
-      ),
-      targetConfig.hp,
-      targetConfig.onDeath
-    );
-    if (targetConfig.movement?.strategy) {
-      target.setMovementStrategy(targetConfig.movement);
-    }
+  createTarget(): number {
+    const target = new Target(this);
     this.add(target);
+    return target.id;
+  }
+
+  setupTarget(
+    targetId: number,
+    radius: number,
+    height: number,
+    posX: number,
+    posY: number,
+    posZ: number,
+    maxHp: number,
+    hp: number
+  ) {
+    const target = this.findTargetById(targetId);
+    if (!target) {
+      console.error("somehow target does not exist");
+      return;
+    }
+
+    target.setup(radius, height, new Vector3(posX, posY, posZ), maxHp, hp);
+  }
+
+  updateTarget(
+    targetId: number,
+    posX: number,
+    posY: number,
+    posZ: number,
+    hp: number
+  ) {
+    const target = this.findTargetById(targetId);
+    if (!target) {
+      console.error("somehow target does not exist");
+      return;
+    }
+
+    target.update(new Vector3(posX, posY, posZ), hp);
   }
 
   add(target: Target) {
@@ -262,7 +323,15 @@ export class Game {
 
   remove(target: Target) {
     this.targetsToRemove.push(target);
-    target.removeObjectFromParent(this.scene);
+    // target.removeObjectFromParent(this.scene);
+    // TODO: check if this is better here then in the onTick loop? for whatever reason
+  }
+
+  findTargetById(targetId: number) {
+    return (
+      this.targets.get(targetId) ??
+      this.targetsToAdd.find((t) => t.id === targetId)
+    );
   }
 
   updateAverageFps(delta: number) {
@@ -277,6 +346,10 @@ export class Game {
     this.avgFps =
       this.fpsHistory.reduce((total, i) => (total += i), 0) /
       this.fpsHistory.length;
+  }
+
+  get cameraPosition() {
+    return this.camera.position;
   }
 
   get averageFps() {
