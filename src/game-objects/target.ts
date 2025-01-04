@@ -65,7 +65,7 @@ export class Target extends GameObject {
 
       this.fullHpBarScale = radius * 2;
 
-      const hpBarGeo = new PlaneGeometry(this.fullHpBarScale, 0.025);
+      const hpBarGeo = new PlaneGeometry(this.fullHpBarScale, 0.04);
       const hpBarBg = new Mesh(hpBarGeo, HP_BAR_BG_MATERIAL);
       hpBar.add(hpBarBg);
 
@@ -122,13 +122,13 @@ export class Target extends GameObject {
       return;
     }
 
-    // if (this.onDeath) this.onDeath();
+    this.game.handlers?.handleDeath(this.id);
     this.game.remove(this);
     super.destroy();
   }
 
   onHit() {
-    if (this.maxHP === 0 || this.hp === 0) {
+    if (this.maxHP === 0 && this.hp === 0) {
       // do nothing
       return;
     }

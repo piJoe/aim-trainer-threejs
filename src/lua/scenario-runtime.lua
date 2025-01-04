@@ -11,6 +11,7 @@ local userScenarioEnv = {
 
 -- Adds a target to the manager
 function TargetManager.addTarget(config)
+    if not config then config = {} end
     local id = __js_calls.createTarget()
     local target = {
         id = id,
@@ -26,25 +27,24 @@ function TargetManager.addTarget(config)
     TargetManager.setupTarget(target)
     targets[target.id] = target
 
-    function target:setSize(radius, height)
-        self.size.radius = radius
-        self.size.height = height
-    end
-
     function target:setPosition(x, y, z)
         self.position.x = x
         self.position.y = y
         self.position.z = z
     end
 
+    function target:moveBy(x, y, z, delta)
+        self.position.x = self.position.x + (x * delta)
+        self.position.y = self.position.y + (y * delta)
+        self.position.z = self.position.z + (z * delta)
+    end
+
     function target:setHP(hp)
         self.hp = hp
     end
 
-    function target:setVelocity(x, y, z)
-        self.velocity.x = x
-        self.velocity.y = y
-        self.velocity.z = z
+    function target:addHP(add)
+        self.hp = self.hp + add
     end
 end
 
@@ -94,8 +94,10 @@ function __fromjs.handleTargetHit(targetId)
     if target then
         if target.onHit then
             target:onHit()
-            TargetManager.updateTarget(target)
+        else
+            target:addHP(-1)
         end
+        TargetManager.updateTarget(target)
     end
 end
 

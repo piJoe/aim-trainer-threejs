@@ -16,6 +16,7 @@ interface ClickEvent {
 }
 
 export class AimControls {
+  private camera?: Camera;
   public locked = false;
   private minPolarAngle = 0;
   private maxPolarAngle = Math.PI;
@@ -24,7 +25,7 @@ export class AimControls {
   private clickEventQueue: ClickEvent[] = [];
   private mouseDown = false;
 
-  constructor(private camera: Camera, private domElement: HTMLElement) {
+  constructor(private domElement: HTMLElement) {
     this.domElement.ownerDocument.addEventListener(
       "pointerrawupdate",
       this.onPointerRawEvent.bind(this) as EventListener
@@ -48,11 +49,11 @@ export class AimControls {
   }
 
   onPointerRawEvent(event: PointerEvent) {
-    if (!this.isLocked) return;
+    if (!this.isLocked || !this.camera) return;
 
     const { movementX, movementY } = event;
 
-    this.euler.setFromQuaternion(this.camera.quaternion);
+    this.euler.setFromQuaternion(this.camera?.quaternion);
 
     this.euler.y -= movementX * this.mouseSensitivity;
     this.euler.x -= movementY * this.mouseSensitivity;
@@ -62,10 +63,12 @@ export class AimControls {
       Math.min(PI_2 - this.minPolarAngle, this.euler.x)
     );
 
-    this.camera.quaternion.setFromEuler(this.euler);
+    this.camera?.quaternion.setFromEuler(this.euler);
   }
 
   onPointerDownEvent(event: PointerEvent) {
+    if (!this.camera) return;
+
     const { buttons } = event;
     if (buttons === 1) {
       if (!this.mouseDown) {
@@ -80,6 +83,8 @@ export class AimControls {
     }
   }
   onPointerUpEvent(event: PointerEvent) {
+    if (!this.camera) return;
+
     const { buttons } = event;
     if (buttons === 0) {
       this.mouseDown = false;

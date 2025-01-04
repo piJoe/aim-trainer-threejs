@@ -5,9 +5,7 @@ export class AudioHandler {
   miss: Audio;
   hit: Audio;
 
-  constructor(camera: Camera) {
-    camera.add(this.listener);
-
+  constructor() {
     this.miss = new Audio(this.listener);
     this.hit = new Audio(this.listener);
 
@@ -21,6 +19,10 @@ export class AudioHandler {
       this.hit.setBuffer(buffer);
       this.hit.setVolume(0.2);
     });
+  }
+
+  setCamera(camera: Camera) {
+    camera.add(this.listener);
   }
 
   playMiss() {

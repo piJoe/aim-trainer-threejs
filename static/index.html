@@ -15,10 +15,24 @@
             background: #000;
             overflow: hidden;
         }
+
+        #fps-counter {
+            position: absolute;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.3);
+            margin: 16px;
+            padding: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            color: #fff;
+        }
     </style>
 </head>
 
 <body>
+    <div id="fps-counter">000 FPS</div>
     <script src=".build/main.js"></script>
 </body>
 

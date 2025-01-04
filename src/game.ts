@@ -15,6 +15,7 @@ import { Target } from "./game-objects/target";
 import { AimControls, ClickEventType } from "./aim-controls";
 import { AudioHandler } from "./audio";
 import { getAspectRatio, getFov } from "./settings";
+import { LuaHandlers } from "./luaScenario";
 
 interface GameConfig {
   roomSize: { x: number; y: number; z: number };
@@ -62,6 +63,8 @@ export class Game {
     timer: 60,
   };
 
+  public handlers?: LuaHandlers;
+
   // targets: Target[] = [];
   targets: Map<number, Target> = new Map();
   private targetsToAdd: Target[] = [];
@@ -105,7 +108,10 @@ export class Game {
     this.gameConfig.cameraPos.z = z;
   }
 
-  async setup() {
+  async setup(handlers: LuaHandlers) {
+    this.handlers = handlers;
+    this.handlers.handleInit();
+
     const floorTexture = await loadTexture(
       "assets/textures/dark/texture_04.png"
     );
@@ -212,8 +218,14 @@ export class Game {
       }
     }
     if (targetsHit.length > 0) {
+      // sort by distance, nearest to camera should be shot
       targetsHit.sort((a, b) => a.distance - b.distance);
-      targetsHit[0].target.onHit();
+      const target = targetsHit[0].target;
+
+      // handle onhit in lua, then in the base target
+      this.handlers?.handleTargetHit(target.id);
+      target.onHit();
+
       this.audioHandler.playHit();
     } else {
       this.audioHandler.playMiss();
@@ -259,6 +271,10 @@ export class Game {
 
     this.updateControlEvents(delta);
 
+    // first: handle every target inside lua
+    this.handlers?.handleTick(elapsedTime, delta);
+
+    // then handle base onTick implementation
     for (const target of this.targets.values()) {
       target.onTick(elapsedTime, delta);
     }
@@ -346,6 +362,10 @@ export class Game {
     this.avgFps =
       this.fpsHistory.reduce((total, i) => (total += i), 0) /
       this.fpsHistory.length;
+
+    document.getElementById("fps-counter")!.innerHTML = `${this.avgFps.toFixed(
+      2
+    )} FPS`;
   }
 
   get cameraPosition() {

@@ -1,10 +1,11 @@
 import { LuaEngine, LuaFactory } from "wasmoon";
 import luaScenarioRuntime from "./lua/scenario-runtime.lua";
 
-interface LuaHandlers {
+export interface LuaHandlers {
   handleInit: () => void;
   handleTick: (elapsedTime: number, delta: number) => void;
-  // TODO: add remaining
+  handleDeath: (targetId: number) => void;
+  handleTargetHit: (targetId: number) => void;
 }
 
 let luaInstance: LuaEngine;
