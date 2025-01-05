@@ -1,8 +1,5 @@
 import {
-  AmbientLight,
-  DirectionalLight,
   Mesh,
-  MeshStandardMaterial,
   PerspectiveCamera,
   PlaneGeometry,
   Raycaster,
@@ -10,44 +7,18 @@ import {
   Vector2,
   Vector3,
 } from "three";
-import { loadTexture } from "./texture";
 import { Target } from "./game-objects/target";
 import { AimControls, ClickEventType } from "./aim-controls";
 import { AudioHandler } from "./audio";
 import { getAspectRatio, getFov } from "./settings";
 import { LuaHandlers } from "./luaScenario";
+import { MATERIAL_IDS, MATERIALS } from "./asset-loader";
 
 interface GameConfig {
   roomSize: { x: number; y: number; z: number };
   cameraPos: { x: number; y: number; z: number };
   bulletsPerMinute?: number;
   timer: number;
-}
-
-export enum MovementStrategy {
-  STATIC = "static",
-  LINEAR = "linear",
-  VELOCITY_CURVE = "velocity_curve",
-  CUSTOM = "custom",
-}
-
-export interface TargetConfig {
-  size: { radius: number; height: number };
-  position: { x: number; y: number; z: number };
-  hp: number;
-  movement?: {
-    strategy: MovementStrategy;
-    boundingBox?: {
-      min?: { x: number; y: number; z: number };
-      max?: { x: number; y: number; z: number };
-    };
-    curve?: { x: number; y: number; z: number }[];
-    curveUpdateSpeed?: number;
-    velocity?: { x: number; y: number; z: number };
-    changeDirectionChance?: number;
-    changeDirectionCooldown?: number;
-  };
-  onDeath?: () => void;
 }
 
 export class Game {
@@ -112,22 +83,6 @@ export class Game {
     this.handlers = handlers;
     this.handlers.handleInit();
 
-    const floorTexture = await loadTexture(
-      "assets/textures/dark/texture_04.png"
-    );
-    const wallTexture = await loadTexture(
-      "assets/textures/dark/texture_13.png"
-    );
-
-    const wallMaterial = new MeshStandardMaterial({
-      color: 0xdddddd,
-      map: wallTexture,
-    });
-    const floorMaterial = new MeshStandardMaterial({
-      color: 0x888888,
-      map: floorTexture,
-    });
-
     const createWall = (
       width: number,
       height: number,
@@ -149,7 +104,12 @@ export class Game {
         uv[i] *= width;
         uv[i + 1] *= height;
       }
-      return new Mesh(wall, isFloor ? floorMaterial : wallMaterial);
+      return new Mesh(
+        wall,
+        isFloor
+          ? MATERIALS.get(MATERIAL_IDS.FLOOR)
+          : MATERIALS.get(MATERIAL_IDS.WALL)
+      );
     };
 
     const roomSize = this.gameConfig.roomSize;
@@ -184,16 +144,16 @@ export class Game {
 
     walls.forEach((wall) => this.scene.add(wall));
 
-    const light = new DirectionalLight(0xd8e5ff, 1);
-    this.scene.add(light);
+    // const light = new DirectionalLight(0xd8e5ff, 1);
+    // this.scene.add(light);
 
-    const lightFront = new DirectionalLight(0xffffff, 0.6);
-    lightFront.position.z = 50;
-    lightFront.position.x = 30;
-    this.scene.add(lightFront);
+    // const lightFront = new DirectionalLight(0xffffff, 0.6);
+    // lightFront.position.z = 50;
+    // lightFront.position.x = 30;
+    // this.scene.add(lightFront);
 
-    const ambientLight = new AmbientLight(0xffffff, 0.8);
-    this.scene.add(ambientLight);
+    // const ambientLight = new AmbientLight(0xffffff, 0.8);
+    // this.scene.add(ambientLight);
 
     this.camera.position.set(
       this.gameConfig.cameraPos.x,

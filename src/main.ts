@@ -1,23 +1,17 @@
 import { AimControls } from "./aim-controls";
 import { Crosshair } from "./crosshair";
 import { Game } from "./game";
-import { LuaFactory } from "wasmoon";
 import {
+  ACESFilmicToneMapping,
   Clock,
   OrthographicCamera,
-  PerspectiveCamera,
-  Raycaster,
   Scene,
-  TextureLoader,
   WebGLRenderer,
 } from "three";
 import { AudioHandler } from "./audio";
-
-// lua imports (handled by esbuild)
-import luaScenarioRuntime from "./lua/scenario-runtime.lua";
 import { runLuaScenario } from "./luaScenario";
+import { loadAssets, TEXTURE_IDS, TEXTURES } from "./asset-loader";
 
-const scene = new Scene();
 const hfov = 103;
 const aspectRatio = window.innerWidth / window.innerHeight;
 const vfov =
@@ -35,6 +29,7 @@ window.addEventListener("click", () => {
 const renderer = new WebGLRenderer();
 renderer.autoClear = false;
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = ACESFilmicToneMapping;
 document.body.appendChild(renderer.domElement);
 
 const overlayCamera = new OrthographicCamera(
@@ -53,6 +48,8 @@ overlayScene.add(crosshair.object);
 const audio = new AudioHandler();
 
 (async () => {
+  await loadAssets(renderer);
+
   const luaStr = await (await fetch("/examples/v2/gpt-pasu-like.lua")).text();
 
   const game = new Game(controls, audio);
@@ -60,6 +57,7 @@ const audio = new AudioHandler();
   const handlers = await runLuaScenario(luaCalls, luaStr);
 
   const { scene, camera } = await game.setup(handlers);
+  scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
 
   const clock = new Clock();
   let firstFrame = true;
@@ -81,4 +79,9 @@ const audio = new AudioHandler();
   }
   scene.updateMatrixWorld();
   renderer.setAnimationLoop(render);
+
+  // hide loading screen
+  document
+    .querySelector(".loading-screen")
+    ?.classList.toggle("loading-done", true);
 })();

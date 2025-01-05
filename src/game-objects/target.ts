@@ -8,22 +8,27 @@ import {
   PlaneGeometry,
   Object3D,
   Box3,
+  EquirectangularReflectionMapping,
 } from "three";
 import { GameObject } from "./game-object";
-import { Game, MovementStrategy, TargetConfig } from "../game";
+import { Game } from "../game";
+import { MATERIAL_IDS, MATERIALS } from "../asset-loader";
 
-const DEFAULT_MATERIAL = new MeshStandardMaterial({
-  color: 0xfb4121,
-  roughness: 0.4,
-});
+// const DEFAULT_MATERIAL = new MeshStandardMaterial({
+//   // color: 0xfb4121,
+//   color: 0x00ffc6,
+//   roughness: 0.3,
+// });
 
-const HP_BAR_BG_MATERIAL = new MeshBasicMaterial({
-  color: 0x682727,
-});
+// const HP_BAR_BG_MATERIAL = new MeshBasicMaterial({
+//   // color: 0x682727,
+//   color: 0x3c7c6e,
+// });
 
-const HP_BAR_FG_MATERIAL = new MeshBasicMaterial({
-  color: 0xb03131,
-});
+// const HP_BAR_FG_MATERIAL = new MeshBasicMaterial({
+//   // color: 0xb03131,
+//   color: 0x00ffc6,
+// });
 
 export class Target extends GameObject {
   private maxHP: number = 1;
@@ -40,7 +45,7 @@ export class Target extends GameObject {
   // private lastChangeDirectionTimestamp = 0;
 
   constructor(game: Game) {
-    const mesh = new Mesh(undefined, DEFAULT_MATERIAL);
+    const mesh = new Mesh(undefined, MATERIALS.get(MATERIAL_IDS.TARGET));
     super(game, mesh);
   }
 
@@ -63,17 +68,17 @@ export class Target extends GameObject {
     if (this.maxHP > 1) {
       const hpBar = new Group();
 
-      this.fullHpBarScale = radius * 2;
+      this.fullHpBarScale = Math.max(radius * 2, 0.325);
 
-      const hpBarGeo = new PlaneGeometry(this.fullHpBarScale, 0.04);
-      const hpBarBg = new Mesh(hpBarGeo, HP_BAR_BG_MATERIAL);
+      const hpBarGeo = new PlaneGeometry(this.fullHpBarScale, 0.06);
+      const hpBarBg = new Mesh(hpBarGeo, MATERIALS.get(MATERIAL_IDS.HP_BAR_BG));
       hpBar.add(hpBarBg);
 
-      const hpBarFg = new Mesh(hpBarGeo, HP_BAR_FG_MATERIAL);
+      const hpBarFg = new Mesh(hpBarGeo, MATERIALS.get(MATERIAL_IDS.HP_BAR_FG));
       hpBarFg.position.z = 0.001;
       hpBar.add(hpBarFg);
 
-      hpBar.position.set(0, height / 2 + radius + 0.05, 0);
+      hpBar.position.set(0, height / 2 + radius + 0.07, 0);
 
       this.mesh.add(hpBar);
       this.hpBar = hpBarFg;
