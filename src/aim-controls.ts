@@ -126,8 +126,4 @@ export class AimControls {
   unlock() {
     this.domElement.ownerDocument.exitPointerLock();
   }
-
-  setMouseSensitivity(cmPer360: number, dpi: number) {
-    this.mouseSensitivity = calculateSensitivityByCmPer360(cmPer360, dpi);
-  }
 }
