@@ -129,6 +129,7 @@ export class Target extends GameObject {
 
     this.game.handlers?.handleDeath(this.id);
     this.game.remove(this);
+    this.game.audioHandler.playKill();
     super.destroy();
   }
 

@@ -53,7 +53,7 @@ export class Game {
 
   constructor(
     private controls: AimControls,
-    private audioHandler: AudioHandler
+    public audioHandler: AudioHandler
   ) {
     this.controls.setCamera(this.camera);
   }
