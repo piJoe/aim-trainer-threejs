@@ -29,7 +29,7 @@ export function getMouseSens() {
 }
 
 //@ts-ignore
-window["setSensitivy"] = (cmPer360: number, dpi = 800): void => {
+window["setSensitivity"] = (cmPer360: number, dpi = 800): void => {
   settings.mouseSensitivity = calculateSensitivityByCmPer360(cmPer360, dpi);
   window.dispatchEvent(new CustomEvent("mouse_sens"));
 
