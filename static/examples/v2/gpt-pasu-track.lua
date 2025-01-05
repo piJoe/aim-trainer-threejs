@@ -23,7 +23,7 @@ function spawnPASUTarget()
     spawnTarget({
         size = { radius = 0.12, height = 0.05 },
         position = { x = randomFloat(-4, 4), y = randomFloat(-2, 2), z = randomFloat(-2, 2) },
-        hp = 20,
+        hp = 10,
         onTick = createPASUMovement(),
         onDeath = function()
             -- Respawn the target with the same PASU movement
