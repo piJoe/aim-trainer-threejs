@@ -22,7 +22,8 @@ export class AudioHandler {
       this.hit.setVolume(0.2);
     });
 
-    // TODO: replace with fully free sound, current license is attribution (https://freesound.org/people/ChrisReierson/sounds/383979/)
+    // TODO: replace with true free sound or make proper attribution file
+    // frozen wind chime ding by ChrisReierson -- https://freesound.org/s/383979/ -- License: Attribution 4.0
     audioLoader.load("/assets/audio/kill_confirm.ogg", (buffer) => {
       this.kill.setBuffer(buffer);
       this.kill.setVolume(0.3);
