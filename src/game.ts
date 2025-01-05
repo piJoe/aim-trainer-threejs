@@ -1,4 +1,5 @@
 import {
+  AmbientLight,
   Mesh,
   PerspectiveCamera,
   PlaneGeometry,
@@ -26,6 +27,8 @@ export class Game {
   private camera = new PerspectiveCamera(getFov(), getAspectRatio(), 0.1, 1000);
   private raycastCam = this.camera.clone();
   private raycaster = new Raycaster();
+
+  // private shotRenderer = new WebGLRenderer();
 
   private gameConfig: GameConfig = {
     roomSize: { x: 8, y: 4, z: 6 },
@@ -152,8 +155,8 @@ export class Game {
     // lightFront.position.x = 30;
     // this.scene.add(lightFront);
 
-    // const ambientLight = new AmbientLight(0xffffff, 0.8);
-    // this.scene.add(ambientLight);
+    const ambientLight = new AmbientLight(0xffffff, 0.5);
+    this.scene.add(ambientLight);
 
     this.camera.position.set(
       this.gameConfig.cameraPos.x,
@@ -162,6 +165,15 @@ export class Game {
     );
 
     this.bulletsPerSecond = (this.gameConfig.bulletsPerMinute ?? 0) / 60;
+
+    // TODO: unregister when game scenario done
+    window.addEventListener("resize", () => {
+      this.camera.aspect = getAspectRatio();
+      this.camera.fov = getFov();
+      this.raycastCam.copy(this.camera);
+      this.camera.updateProjectionMatrix();
+      this.raycastCam.updateProjectionMatrix();
+    });
 
     return { scene: this.scene, camera: this.camera };
   }
@@ -208,6 +220,12 @@ export class Game {
           this.raycastCam.quaternion.copy(event.cameraQuaternion);
           this.raycastCam.updateMatrixWorld();
           this.raycaster.setFromCamera(this.raycasterVector, this.raycastCam);
+
+          // // test make "screenshot" of hit from raycast cam
+          // this.shotRenderer.setSize(1920, 1920 / getAspectRatio());
+          // this.shotRenderer.render(this.scene, this.raycastCam);
+          // console.log(this.shotRenderer.domElement.toDataURL("img/png"));
+
           this.performShot();
         }
       }

@@ -47,7 +47,7 @@ async function createMaterials() {
       color: 0x851066,
       // color: 0x00ffc6,
       // color: 0xff007a,
-      roughness: 0.4,
+      roughness: 0.3,
       metalness: 0.01,
     })
   );
@@ -71,7 +71,7 @@ async function loadTextures(renderer: WebGLRenderer) {
   const promises = [
     loadTexture(
       TEXTURE_IDS.ENV_AUTOSHOP,
-      "/assets/textures/env/autoshop.exr",
+      "/assets/textures/env/metro.exr",
       {},
       renderer
     ),

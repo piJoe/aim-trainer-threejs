@@ -12,13 +12,6 @@ import { AudioHandler } from "./audio";
 import { runLuaScenario } from "./luaScenario";
 import { loadAssets, TEXTURE_IDS, TEXTURES } from "./asset-loader";
 
-const hfov = 103;
-const aspectRatio = window.innerWidth / window.innerHeight;
-const vfov =
-  2 *
-  Math.atan(Math.tan((hfov * Math.PI) / 180 / 2) / aspectRatio) *
-  (180 / Math.PI);
-
 const controls = new AimControls(document.body);
 window.addEventListener("click", () => {
   if (!controls.isLocked) {
@@ -44,6 +37,16 @@ overlayCamera.position.z = 1;
 const overlayScene = new Scene();
 const crosshair = new Crosshair(6, 2);
 overlayScene.add(crosshair.object);
+
+window.addEventListener("resize", () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  overlayCamera.left = -window.innerWidth / 2;
+  overlayCamera.right = window.innerWidth / 2;
+  overlayCamera.top = window.innerHeight / 2;
+  overlayCamera.bottom = -window.innerHeight / 2;
+  overlayCamera.updateProjectionMatrix();
+});
 
 const audio = new AudioHandler();
 
