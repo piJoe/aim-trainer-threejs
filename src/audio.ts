@@ -22,6 +22,7 @@ export class AudioHandler {
       this.hit.setVolume(0.2);
     });
 
+    // TODO: replace with fully free sound, current license is attribution (https://freesound.org/people/ChrisReierson/sounds/383979/)
     audioLoader.load("/assets/audio/kill_confirm.ogg", (buffer) => {
       this.kill.setBuffer(buffer);
       this.kill.setVolume(0.3);
