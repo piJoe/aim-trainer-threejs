@@ -91,4 +91,10 @@ export async function loadAssets(renderer: WebGLRenderer) {
 
   // then setup materials
   await createMaterials();
+
+  // await new Promise<void>((res) => {
+  //   window.setTimeout(() => {
+  //     res();
+  //   }, 6000);
+  // });
 }
