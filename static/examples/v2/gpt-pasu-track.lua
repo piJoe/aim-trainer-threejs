@@ -9,8 +9,8 @@ function onInit()
     -- Global game parameters
     setupRoom(20, 10, 10)
     setCameraPosition(0, 0, 4.5)
-    -- setWeaponConfig({ bulletsPerMinute = 600 })
-    -- setScenarioTimer(60) -- Scenario lasts 60 seconds
+    setWeaponRPM(900)
+    -- setTimer(60) -- Scenario lasts 60 seconds
 
     -- Spawn multiple PASU targets
     for i = 1, 5 do
@@ -23,7 +23,7 @@ function spawnPASUTarget()
     spawnTarget({
         size = { radius = 0.12, height = 0.05 },
         position = { x = randomFloat(-4, 4), y = randomFloat(-2, 2), z = randomFloat(-2, 2) },
-        hp = 3,
+        hp = 20,
         onTick = createPASUMovement(),
         onDeath = function()
             -- Respawn the target with the same PASU movement

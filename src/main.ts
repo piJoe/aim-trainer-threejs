@@ -53,7 +53,7 @@ const audio = new AudioHandler();
 (async () => {
   await loadAssets(renderer);
 
-  const luaStr = await (await fetch("/examples/v2/gpt-pasu-like.lua")).text();
+  const luaStr = await (await fetch("/examples/v2/gpt-pasu-track.lua")).text();
 
   const game = new Game(controls, audio);
   const luaCalls = game.getLuaCalls();

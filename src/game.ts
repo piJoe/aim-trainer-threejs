@@ -65,7 +65,7 @@ export class Game {
       updateTarget: this.updateTarget.bind(this),
       setRoomSize: this.setRoomSize.bind(this),
       setCameraPosition: this.setCameraPosition.bind(this),
-      setWeaponRPM: () => {},
+      setWeaponRPM: this.setWeaponRPM.bind(this),
       setTimer: () => {},
     };
   }
@@ -80,6 +80,10 @@ export class Game {
     this.gameConfig.cameraPos.x = x;
     this.gameConfig.cameraPos.y = y;
     this.gameConfig.cameraPos.z = z;
+  }
+
+  setWeaponRPM(rpm: number) {
+    this.gameConfig.bulletsPerMinute = rpm;
   }
 
   async setup(handlers: LuaHandlers) {
