@@ -4,8 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build-old": "esbuild src/main.ts --bundle --external:path --external:fs --external:child_process --external:crypto --external:url --external:module --outfile=static/.build/main.js",
-    "watch-odl": "esbuild src/main.ts --bundle --external:path --external:fs --external:child_process --external:crypto --external:url --external:module --outfile=static/.build/main.js --watch",
     "build": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch"
   },
