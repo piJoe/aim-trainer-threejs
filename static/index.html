@@ -20,6 +20,7 @@
             overflow: hidden;
             font-family: Arial, Helvetica, sans-serif;
             color: #fff;
+            text-transform: uppercase;
         }
 
         #fps-counter {
@@ -121,6 +122,27 @@
             backdrop-filter: blur(20px);
         }
 
+        @media only screen and (min-height: 1440px) {
+            .main-menu {
+                padding-top: 80px;
+                padding-bottom: 80px;
+            }
+        }
+
+        @media only screen and (min-width: 2560px) {
+            .main-menu {
+                padding-left: 120px;
+                padding-right: 120px;
+            }
+        }
+
+        @media only screen and (min-width: 3840px) {
+            .main-menu {
+                padding-left: 240px;
+                padding-right: 240px;
+            }
+        }
+
         .main-menu.menu-hidden {
             display: none;
         }
@@ -160,7 +182,19 @@
             display: flex;
             flex-direction: row;
             gap: 40px;
-            justify-content: end;
+            align-items: end;
+        }
+
+        .footer-right {
+            margin-left: auto;
+        }
+
+        .scenario-label {
+            font-size: 15px;
+        }
+
+        .scenario-title {
+            font-size: 22px;
         }
 
         .keyboard-hint {
@@ -398,9 +432,19 @@
             <li id="menu-choose-scenario">CHOOSE SCENARIO</li>
             <li id="menu-editor">EDITOR</li>
         </ul>
-        <ul class="menu-footer">
-            <li><span class="keyboard-hint">F11</span>FULLSCREEN</li>
-        </ul>
+        <div class="menu-footer">
+            <div class="footer-left">
+                <div class="scenario-label">
+                    CURRENT SCENARIO:
+                </div>
+                <div class="scenario-title">
+                    GPT Tracking V2
+                </div>
+            </div>
+            <ul class="footer-right">
+                <li><span class="keyboard-hint">F11</span>FULLSCREEN</li>
+            </ul>
+        </div>
     </div>
     <div id="fps-counter">000 FPS</div>
     <script src=".build/main.js"></script>
