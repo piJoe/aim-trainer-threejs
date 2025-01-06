@@ -50,12 +50,12 @@ const audio = new AudioHandler();
   toggleLoadingScreen(true);
   await loadAssets(renderer);
 
-  setLoadingText("LOADING SCENARIO", "gpt-tracking");
+  setLoadingText("LOADING SCENARIO", "GPT Tracking V2");
   const luaStr = await (await fetch("/examples/v2/gpt-tracking.lua")).text();
 
   async function setupScenario() {
     toggleLoadingScreen(true);
-    setLoadingText("SETUP SCENARIO", "gpt-tracking");
+    setLoadingText("SETUP SCENARIO", "GPT Tracking V2");
     const game = new Game(controls, audio);
     const luaCalls = game.getLuaCalls();
     const handlers = await runLuaScenario(luaCalls, luaStr);
