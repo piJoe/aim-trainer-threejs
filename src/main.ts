@@ -11,6 +11,7 @@ import {
 import { AudioHandler } from "./audio";
 import { runLuaScenario } from "./luaScenario";
 import { loadAssets, TEXTURE_IDS, TEXTURES } from "./asset-loader";
+import { setLoadingText, toggleLoadingScreen } from "./loading";
 
 const controls = new AimControls(document.body);
 window.addEventListener("click", () => {
@@ -51,8 +52,10 @@ window.addEventListener("resize", () => {
 const audio = new AudioHandler();
 
 (async () => {
+  toggleLoadingScreen(true);
   await loadAssets(renderer);
 
+  setLoadingText("LOADING SCENARIO", "gpt-pasu-track-v2");
   const luaStr = await (await fetch("/examples/v2/gpt-pasu-track.lua")).text();
 
   const game = new Game(controls, audio);
@@ -83,8 +86,5 @@ const audio = new AudioHandler();
   scene.updateMatrixWorld();
   renderer.setAnimationLoop(render);
 
-  // hide loading screen
-  document
-    .querySelector(".loading-screen")
-    ?.classList.toggle("loading-done", true);
+  toggleLoadingScreen(false);
 })();

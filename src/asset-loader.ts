@@ -6,6 +6,7 @@ import {
   WebGLRenderer,
 } from "three";
 import { loadTexture } from "./texture";
+import { setLoadingText } from "./loading";
 
 export enum TEXTURE_IDS {
   ENV_AUTOSHOP = "env_autoshop",
@@ -87,9 +88,11 @@ async function loadTextures(renderer: WebGLRenderer) {
 
 export async function loadAssets(renderer: WebGLRenderer) {
   // load textures
+  setLoadingText("LOADING ASSETS", "LOADING TEXTURES");
   await loadTextures(renderer);
 
   // then setup materials
+  setLoadingText("LOADING ASSETS", "GENERATING MATERIALS");
   await createMaterials();
 
   // await new Promise<void>((res) => {

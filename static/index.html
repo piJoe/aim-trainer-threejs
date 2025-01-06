@@ -38,12 +38,18 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: #5A2175;
+            background: linear-gradient(0deg, #5A2175, #3B0953);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             gap: 20px;
+            opacity: 1;
+        }
+
+        .loading-screen.loading-fade {
+            opacity: 0;
+            transition: all 0.3s ease 0.2s;
         }
 
         .loading-screen.loading-done {
@@ -57,15 +63,44 @@
             color: #00FFC6;
         }
 
+        .loading-fade .loading-logo {
+            filter: blur(40px);
+            transform: scale(10);
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .loading-fade .loading-hint {
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
         .loading-hint {
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 20px;
+            text-align: right;
+            position: absolute;
+            right: 60px;
+            bottom: 60px;
+        }
+
+        .loading-title {
+            font-size: 20px;
+        }
+
+        .loading-desc {
+            font-size: 14px;
         }
 
         .loading-indicator {
             width: 74px;
-            color: #00FFC6;
+        }
+
+        .loading-indicator.paused * {
+            animation-play-state: paused !important;
+            opacity: 0.4;
         }
     </style>
 </head>
@@ -78,6 +113,10 @@
                 fill="currentcolor" />
         </svg>
         <div class="loading-hint">
+            <div class="loading-text">
+                <div class="loading-title">LOADING</div>
+                <div class="loading-desc"></div>
+            </div>
             <svg class="loading-indicator" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 74 66" fill="none">
                 <style>
                     @keyframes i_0 {
