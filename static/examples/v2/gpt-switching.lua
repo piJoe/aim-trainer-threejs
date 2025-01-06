@@ -1,4 +1,10 @@
--- PASU Scenario Script
+--[[@SCENARIO
+Title: GPT Swichting V2
+Type: Switching
+Author: Admin (and GPT)
+Description: A scenario with predefined movement patterns for training target switching.
+Version: 2.0
+]]
 
 local function randomFloat(min, max)
     return min + math.random() * (max - min)
@@ -9,31 +15,26 @@ function onInit()
     -- Global game parameters
     setupRoom(20, 10, 10)
     setCameraPosition(0, 0, 4.5)
-    setWeaponRPM(900)
-    -- setTimer(60) -- Scenario lasts 60 seconds
 
-    -- Spawn multiple PASU targets
     for i = 1, 5 do
-        spawnPASUTarget()
+        spawnCustomTarget()
     end
 end
 
 -- Abstracted Target Spawning Function
-function spawnPASUTarget()
+function spawnCustomTarget()
     spawnTarget({
         size = { radius = 0.12, height = 0.05 },
         position = { x = randomFloat(-4, 4), y = randomFloat(-2, 2), z = randomFloat(-2, 2) },
-        hp = 10,
-        onTick = createPASUMovement(),
+        hp = 1,
+        onTick = createMovement(),
         onDeath = function()
-            -- Respawn the target with the same PASU movement
-            spawnPASUTarget()
+            spawnCustomTarget()
         end,
     })
 end
 
--- Create PASU Movement Pattern
-function createPASUMovement()
+function createMovement()
     local amplitude = randomFloat(0.5, 2)            -- Movement amplitude (distance covered)
     local amplitudeY = randomFloat(0.2, 0.5)         -- Movement amplitude (distance covered)
     local frequency = randomFloat(2, 2.5)            -- Movement frequency
@@ -61,7 +62,7 @@ function createPASUMovement()
                 direction = 0
             end
         end
-        -- Calculate new position based on PASU pattern
+        -- Calculate new position
         local x = (amplitude * math.cos(frequency * elapsedTime + randomOffset + direction)) +
             ((amplitudeY * 2) * math.cos(frequencyY * 3 * elapsedTime)) +
             (2.5 * math.cos(3 * elapsedTime + randomOffset))

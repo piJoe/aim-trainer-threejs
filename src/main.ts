@@ -14,11 +14,6 @@ import { loadAssets, TEXTURE_IDS, TEXTURES } from "./asset-loader";
 import { setLoadingText, toggleLoadingScreen } from "./loading";
 
 const controls = new AimControls(document.body);
-window.addEventListener("click", () => {
-  if (!controls.isLocked) {
-    controls.lock();
-  }
-});
 
 const renderer = new WebGLRenderer();
 renderer.autoClear = false;
@@ -55,36 +50,53 @@ const audio = new AudioHandler();
   toggleLoadingScreen(true);
   await loadAssets(renderer);
 
-  setLoadingText("LOADING SCENARIO", "gpt-pasu-track-v2");
-  const luaStr = await (await fetch("/examples/v2/gpt-pasu-track.lua")).text();
+  setLoadingText("LOADING SCENARIO", "gpt-tracking");
+  const luaStr = await (await fetch("/examples/v2/gpt-tracking.lua")).text();
 
-  const game = new Game(controls, audio);
-  const luaCalls = game.getLuaCalls();
-  const handlers = await runLuaScenario(luaCalls, luaStr);
+  async function setupScenario() {
+    toggleLoadingScreen(true);
+    setLoadingText("SETUP SCENARIO", "gpt-tracking");
+    const game = new Game(controls, audio);
+    const luaCalls = game.getLuaCalls();
+    const handlers = await runLuaScenario(luaCalls, luaStr);
 
-  const { scene, camera } = await game.setup(handlers);
-  scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
+    const { scene, camera } = await game.setup(handlers);
+    scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
 
-  const clock = new Clock();
-  let firstFrame = true;
-  function render() {
-    const elapsedTime = clock.elapsedTime;
-    const delta = clock.getDelta();
-    if (!controls.isLocked && !firstFrame) {
-      return;
+    const clock = new Clock();
+    let firstFrame = true;
+    function render() {
+      const elapsedTime = clock.elapsedTime;
+      const delta = clock.getDelta();
+      if (!controls.isLocked && !firstFrame) {
+        return;
+      }
+
+      game.onTick(elapsedTime, delta);
+
+      renderer.clear();
+      renderer.render(scene, camera);
+      renderer.clearDepth();
+      renderer.render(overlayScene, overlayCamera);
+
+      firstFrame = false;
     }
+    scene.updateMatrixWorld();
+    renderer.setAnimationLoop(render);
 
-    game.onTick(elapsedTime, delta);
-
-    renderer.clear();
-    renderer.render(scene, camera);
-    renderer.clearDepth();
-    renderer.render(overlayScene, overlayCamera);
-
-    firstFrame = false;
+    toggleLoadingScreen(false);
   }
-  scene.updateMatrixWorld();
-  renderer.setAnimationLoop(render);
 
-  toggleLoadingScreen(false);
+  await setupScenario();
+
+  document.getElementById("menu-continue")?.addEventListener("click", () => {
+    controls.lock();
+  });
+  document
+    .getElementById("menu-restart")
+    ?.addEventListener("click", async () => {
+      // TODO: TEST IF WE NEED TO RESET ANYTHING LIKE REMOVE GEOMETRY OR MATERIALS FROM GPU OR SOMETHING, IDK
+      await setupScenario();
+      controls.lock();
+    });
 })();

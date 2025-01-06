@@ -1,5 +1,6 @@
 import { Camera, Euler, Quaternion, Vector3 } from "three";
 import { getMouseSens } from "./settings";
+import { toggleMenu } from "./menu";
 
 const PI_2 = Math.PI / 2;
 
@@ -115,6 +116,7 @@ export class AimControls {
 
   onPointerLockChange() {
     this.locked = document.pointerLockElement === this.domElement;
+    toggleMenu(!this.locked);
   }
 
   lock() {
