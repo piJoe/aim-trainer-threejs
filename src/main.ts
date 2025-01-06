@@ -12,6 +12,7 @@ import { AudioHandler } from "./audio";
 import { runLuaScenario } from "./luaScenario";
 import { loadAssets, TEXTURE_IDS, TEXTURES } from "./asset-loader";
 import { setLoadingText, toggleLoadingScreen } from "./loading";
+import { setUserMouseSensitivity } from "./settings";
 
 const controls = new AimControls(document.body);
 
@@ -99,4 +100,21 @@ const audio = new AudioHandler();
       await setupScenario();
       controls.lock();
     });
+  document.getElementById("menu-settings")?.addEventListener("click", () => {
+    document.querySelector(".sens-setting")?.classList.toggle("hidden", false);
+  });
+
+  document.getElementById("close-setting")?.addEventListener("click", () => {
+    document.querySelector(".sens-setting")?.classList.toggle("hidden", true);
+  });
+  document.getElementById("save-sensitivity")?.addEventListener("click", () => {
+    const cmPer360 =
+      (document.getElementById("setting-mouse-cmper360") as HTMLInputElement)
+        .value ?? "30";
+    const dpi =
+      (document.getElementById("setting-mouse-dpi") as HTMLInputElement)
+        .value ?? "800";
+
+    setUserMouseSensitivity(parseFloat(cmPer360), parseInt(dpi));
+  });
 })();
