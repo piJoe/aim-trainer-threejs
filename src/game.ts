@@ -321,8 +321,6 @@ export class Game {
 
   remove(target: Target) {
     this.targetsToRemove.push(target);
-    // target.removeObjectFromParent(this.scene);
-    // TODO: check if this is better here then in the onTick loop? for whatever reason
   }
 
   findTargetById(targetId: number) {

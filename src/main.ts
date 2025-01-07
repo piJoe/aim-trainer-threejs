@@ -97,6 +97,7 @@ const audio = new AudioHandler();
     .getElementById("menu-restart")
     ?.addEventListener("click", async () => {
       // TODO: TEST IF WE NEED TO RESET ANYTHING LIKE REMOVE GEOMETRY OR MATERIALS FROM GPU OR SOMETHING, IDK
+      // we at least need to cleanup some event handlers inside game.ts!
       await setupScenario();
       controls.lock();
     });

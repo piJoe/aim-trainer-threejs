@@ -106,7 +106,6 @@ function __fromjs.handleTick(elapsed, delta)
     --     onUpdate(elapsed, delta)
     -- end
     for _, target in pairs(targets) do
-        -- TODO: rename to onTick or sth?
         if target.onTick then
             target:onTick(elapsed, delta)
             TargetManager.updateTarget(target)
