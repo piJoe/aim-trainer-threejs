@@ -69,12 +69,16 @@ const audio = new AudioHandler();
     // let physicsTickAccumulator = 0;
     // const physicsTickRate = 1 / 60;
     let firstFrame = true;
+    let elapsedTime = 0;
     function render() {
-      const elapsedTime = clock.elapsedTime;
+      // const elapsedTime = clock.elapsedTime;
       const delta = clock.getDelta();
       if (!controls.isLocked && !firstFrame) {
         return;
       }
+
+      // need this manually because clock keeps running when game is paused :(
+      elapsedTime += delta;
 
       game.onTick(elapsedTime, delta);
 

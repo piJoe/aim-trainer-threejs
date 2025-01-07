@@ -16,6 +16,7 @@ function onInit()
     setupRoom(20, 10, 10)
     setCameraPosition(0, 0, 4.5)
     setWeaponRPM(900)
+    setTimer(60)
 
     for i = 1, 5 do
         spawnCustomTarget()

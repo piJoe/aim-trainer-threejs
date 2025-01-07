@@ -51,6 +51,15 @@ export class Game {
   private shotAccumulator = 0;
   private shooting = false;
 
+  private elapsedTime = 0;
+  private timer = 0;
+
+  private score = 0;
+  private lastKillTimestamp = 0;
+  private ttkList: number[] = [];
+  private totalShots = 0;
+  private shotsHit = 0;
+
   constructor(
     private controls: AimControls,
     public audioHandler: AudioHandler
@@ -66,7 +75,7 @@ export class Game {
       setRoomSize: this.setRoomSize.bind(this),
       setCameraPosition: this.setCameraPosition.bind(this),
       setWeaponRPM: this.setWeaponRPM.bind(this),
-      setTimer: () => {},
+      setTimer: this.setTimer.bind(this),
     };
   }
 
@@ -84,6 +93,10 @@ export class Game {
 
   setWeaponRPM(rpm: number) {
     this.gameConfig.bulletsPerMinute = rpm;
+  }
+
+  setTimer(seconds: number) {
+    this.gameConfig.timer = seconds;
   }
 
   async setup(handlers: LuaHandlers) {
@@ -170,6 +183,12 @@ export class Game {
 
     this.bulletsPerSecond = (this.gameConfig.bulletsPerMinute ?? 0) / 60;
 
+    this.timer = this.gameConfig.timer ?? 0;
+    document
+      .getElementById("game-timer")!
+      .classList.toggle("hidden", !(this.gameConfig.timer > 0));
+    this.updateTimer(0);
+
     // TODO: unregister when game scenario done
     window.addEventListener("resize", () => {
       this.camera.aspect = getAspectRatio();
@@ -201,11 +220,12 @@ export class Game {
       // handle onhit in lua, then in the base target
       this.handlers?.handleTargetHit(target.id);
       target.onHit();
-
+      this.shotsHit++;
       this.audioHandler.playHit();
     } else {
       this.audioHandler.playMiss();
     }
+    this.totalShots++;
   }
 
   updateControlEvents(delta: number) {
@@ -248,9 +268,46 @@ export class Game {
     }
   }
 
+  updateTimer(elapsedTime: number) {
+    this.elapsedTime = elapsedTime;
+
+    if (this.timer <= 0) return;
+
+    if (this.elapsedTime >= this.timer) {
+      alert(
+        `GAME HAS ENDED! SCORE: ${this.score}\nSee console output for details :)`
+      );
+      console.log("FINAL SCORE:", this.score);
+      console.log(
+        "AVG TTK:",
+        (
+          this.ttkList.reduce((t, ttk) => (t += ttk), 0) / this.ttkList.length
+        ).toFixed(2)
+      );
+      console.log(
+        "ALL TTK:",
+        this.ttkList.map((t) => parseFloat(t.toFixed(2)))
+      );
+      console.log(
+        "SHOT ACCURACY:",
+        ((this.shotsHit / this.totalShots) * 100).toFixed(2),
+        `( ${this.shotsHit} / ${this.totalShots} )`
+      );
+      this.timer = 0;
+    }
+
+    // update timer ui
+    document.getElementById("game-timer")!.textContent = (
+      this.timer - this.elapsedTime
+    )
+      .toFixed(1)
+      .padStart((this.timer + "").length, "0");
+  }
+
   onTick(elapsedTime: number, delta: number) {
     this.updateAverageFps(delta);
 
+    this.updateTimer(elapsedTime);
     this.updateControlEvents(delta);
 
     // first: handle every target inside lua
@@ -283,7 +340,7 @@ export class Game {
 
   createTarget(): number {
     const target = new Target(this);
-    this.add(target);
+    this.addTarget(target);
     return target.id;
   }
 
@@ -322,12 +379,23 @@ export class Game {
     target.update(new Vector3(posX, posY, posZ), hp);
   }
 
-  add(target: Target) {
+  addTarget(target: Target) {
     this.targetsToAdd.push(target);
   }
 
-  remove(target: Target) {
+  removeTarget(target: Target) {
     this.targetsToRemove.push(target);
+  }
+
+  addScore(add: number) {
+    this.score += add;
+  }
+
+  addTTK() {
+    const time = this.elapsedTime - this.lastKillTimestamp;
+    this.lastKillTimestamp = this.elapsedTime;
+
+    this.ttkList.push(time);
   }
 
   findTargetById(targetId: number) {
