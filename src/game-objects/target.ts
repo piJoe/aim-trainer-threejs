@@ -36,6 +36,10 @@ export class Target extends GameObject {
   private hpBar: Object3D | null = null;
   private fullHpBarScale: number = 0;
 
+  private targetPos = new Vector3(0, 0, 0);
+  private previousPos = new Vector3(0, 0, 0);
+  private lerpAcc = 0;
+
   // private movementStrategy: MovementStrategy = MovementStrategy.STATIC;
   // private movementBoundingBox?: Box3;
   // private movementVelocity?: Vector3;
@@ -60,6 +64,10 @@ export class Target extends GameObject {
     this.mesh.geometry = geometry;
 
     this.mesh.position.copy(position);
+
+    // TODO: decouple physics tick from rendering, use interpolation
+    // this.previousPos.copy(this.targetPos);
+    // this.targetPos.copy(position);
 
     this.maxHP = maxHp;
     this.hp = hp;
@@ -92,34 +100,22 @@ export class Target extends GameObject {
     this.hp = hp;
   }
 
-  // setMovementStrategy(movement: TargetConfig["movement"]) {
-  //   if (movement?.strategy === MovementStrategy.LINEAR) {
-  //     this.movementStrategy = MovementStrategy.LINEAR;
-  //     this.movementBoundingBox = new Box3(
-  //       new Vector3(
-  //         movement.boundingBox?.min?.x,
-  //         movement.boundingBox?.min?.y,
-  //         movement.boundingBox?.min?.z
-  //       ),
-  //       new Vector3(
-  //         movement.boundingBox?.max?.x,
-  //         movement.boundingBox?.max?.y,
-  //         movement.boundingBox?.max?.z
-  //       )
-  //     );
-  //     this.movementVelocity = new Vector3(
-  //       movement.velocity?.x,
-  //       movement.velocity?.y,
-  //       movement.velocity?.z
-  //     );
-  //     this.movementDirection = new Vector3(
-  //       Math.random() > 0.5 ? -1 : 1,
-  //       Math.random() > 0.5 ? -1 : 1,
-  //       Math.random() > 0.5 ? -1 : 1
-  //     );
-  //     this.changeDirectionChance = movement.changeDirectionChance ?? 0.5;
-  //     this.changeDirectionCooldown = movement.changeDirectionCooldown ?? 1;
-  //   }
+  // TODO: decouple physics tick from rendering, use interpolation
+  // update(position: Vector3, hp: number) {
+  //   this.mesh.position.copy(this.targetPos);
+  //   this.previousPos.copy(this.targetPos);
+  //   this.targetPos.copy(position);
+  //   this.hp = hp;
+  //   this.lerpAcc = 0;
+  // }
+
+  // render(delta: number, physicsTickRate: number) {
+  //   this.lerpAcc += delta;
+  //   this.mesh.position.lerpVectors(
+  //     this.previousPos,
+  //     this.targetPos,
+  //     Math.min(1.0, this.lerpAcc / physicsTickRate)
+  //   );
   // }
 
   destroy() {

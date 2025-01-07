@@ -274,6 +274,13 @@ export class Game {
     this.targetsToAdd = [];
   }
 
+  // TODO: decouple physics tick from rendering, use interpolation
+  // render(delta: number, physicsTickRate: number) {
+  //   for (const target of this.targets.values()) {
+  //     target.render(delta, physicsTickRate);
+  //   }
+  // }
+
   createTarget(): number {
     const target = new Target(this);
     this.add(target);

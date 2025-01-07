@@ -65,6 +65,9 @@ const audio = new AudioHandler();
     scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
 
     const clock = new Clock();
+    // TODO: decouple physics tick from rendering, use interpolation
+    // let physicsTickAccumulator = 0;
+    // const physicsTickRate = 1 / 60;
     let firstFrame = true;
     function render() {
       const elapsedTime = clock.elapsedTime;
@@ -74,6 +77,14 @@ const audio = new AudioHandler();
       }
 
       game.onTick(elapsedTime, delta);
+
+      // TODO: decouple physics tick from rendering, use interpolation
+      // physicsTickAccumulator += delta;
+      // while (physicsTickAccumulator > physicsTickRate) {
+      //   physicsTickAccumulator -= physicsTickRate;
+      //   game.onTick(elapsedTime, physicsTickRate);
+      // }
+      // game.render(delta, physicsTickRate);
 
       renderer.clear();
       renderer.render(scene, camera);
