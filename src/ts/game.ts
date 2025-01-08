@@ -34,7 +34,7 @@ export class Game {
     roomSize: { x: 8, y: 4, z: 6 },
     cameraPos: { x: 0, y: 0, z: 2 },
     bulletsPerMinute: 0,
-    timer: 60,
+    timer: 0,
   };
 
   public handlers?: LuaHandlers;
@@ -301,7 +301,7 @@ export class Game {
       this.timer - this.elapsedTime
     )
       .toFixed(1)
-      .padStart((this.timer + "").length, "0");
+      .padStart((this.timer + "").length + 2, "0");
   }
 
   onTick(elapsedTime: number, delta: number) {

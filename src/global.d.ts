@@ -1,3 +1,1 @@
-declare module "*.lua" {
-  export = "";
-}
+/// <reference types="vite/client" />

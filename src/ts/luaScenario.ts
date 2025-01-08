@@ -1,5 +1,6 @@
 import { LuaEngine, LuaFactory } from "wasmoon";
-import luaScenarioRuntime from "./lua/scenario-runtime.lua";
+import luaScenarioRuntime from "src/lua/scenario-runtime.lua?raw";
+import luaGlueWasmUrl from "wasmoon/dist/glue.wasm?url";
 
 export interface LuaHandlers {
   handleInit: () => void;
@@ -11,7 +12,7 @@ export interface LuaHandlers {
 let luaInstance: LuaEngine;
 
 async function setupLua() {
-  const factory = new LuaFactory("/.build/glue.wasm");
+  const factory = new LuaFactory(luaGlueWasmUrl);
   const lua = await factory.createEngine({
     injectObjects: false,
     enableProxy: false,

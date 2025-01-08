@@ -4,13 +4,22 @@ import { Game } from "./game";
 import {
   ACESFilmicToneMapping,
   Clock,
+  Mesh,
   OrthographicCamera,
+  PlaneGeometry,
   Scene,
+  Vector3,
   WebGLRenderer,
 } from "three";
 import { AudioHandler } from "./audio";
 import { runLuaScenario } from "./luaScenario";
-import { loadAssets, TEXTURE_IDS, TEXTURES } from "./asset-loader";
+import {
+  loadAssets,
+  MATERIAL_IDS,
+  MATERIALS,
+  TEXTURE_IDS,
+  TEXTURES,
+} from "./asset-loader";
 import { setLoadingText, toggleLoadingScreen } from "./loading";
 import { setUserMouseSensitivity } from "./settings";
 
@@ -52,7 +61,7 @@ const audio = new AudioHandler();
   await loadAssets(renderer);
 
   setLoadingText("LOADING SCENARIO", "GPT Tracking V2");
-  const luaStr = await (await fetch("/examples/v2/gpt-tracking.lua")).text();
+  const luaStr = await (await fetch("/scenarios/v2/gpt-tracking.lua")).text();
 
   async function setupScenario() {
     toggleLoadingScreen(true);
@@ -104,6 +113,50 @@ const audio = new AudioHandler();
   }
 
   await setupScenario();
+
+  async function test() {
+    toggleLoadingScreen(false);
+
+    const game = new Game(controls, audio);
+    const { scene, camera } = await game.setup({ handleInit: () => {} } as any);
+    scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
+
+    // const plane = new CapsuleGeometry(0.08, 0.05, 4, 10);
+    // const edges = new EdgesGeometry(plane, 1);
+    // const lineGeo = new LineSegmentsGeometry().fromEdgesGeometry(edges);
+    // const lines = new LineSegments2(
+    //   lineGeo,
+    //   new LineMaterial({
+    //     color: 0xff00ff,
+    //     linewidth: 1,
+    //   })
+    // );
+    // lines.position.z = 1.5;
+
+    const plane = new PlaneGeometry(0.85, 0.43);
+    const planeM = new Mesh(plane, MATERIALS.get(MATERIAL_IDS.TARGET));
+    scene.add(planeM);
+
+    // scene.add(lines);
+
+    function render() {
+      // const elapsedTime = clock.elapsedTime;
+      if (!controls.isLocked) {
+        return;
+      }
+
+      planeM.rotateOnAxis(new Vector3(0, 1, 0), 0.01);
+      planeM.rotateOnAxis(new Vector3(0, 0, 1), Math.random() * 0.01);
+
+      renderer.clear();
+      renderer.render(scene, camera);
+      renderer.clearDepth();
+      renderer.render(overlayScene, overlayCamera);
+    }
+    scene.updateMatrixWorld();
+    renderer.setAnimationLoop(render);
+  }
+  // await test();
 
   document.getElementById("menu-continue")?.addEventListener("click", () => {
     controls.lock();

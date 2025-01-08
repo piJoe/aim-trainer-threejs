@@ -1,5 +1,9 @@
 import { Camera, AudioListener, Audio, AudioLoader } from "three";
 
+import assetsAudioHit from "assets/audio/hit.ogg?url";
+import assetsAudioMiss from "assets/audio/miss.ogg?url";
+import assetsAudioKill from "assets/audio/kill_confirm.ogg?url";
+
 export class AudioHandler {
   listener = new AudioListener();
   miss: Audio;
@@ -12,19 +16,19 @@ export class AudioHandler {
     this.kill = new Audio(this.listener);
 
     const audioLoader = new AudioLoader();
-    audioLoader.load("/assets/audio/miss.ogg", (buffer) => {
+    audioLoader.load(assetsAudioMiss, (buffer) => {
       this.miss.setBuffer(buffer);
       this.miss.setVolume(0.1);
     });
 
-    audioLoader.load("/assets/audio/hit.ogg", (buffer) => {
+    audioLoader.load(assetsAudioHit, (buffer) => {
       this.hit.setBuffer(buffer);
       this.hit.setVolume(0.2);
     });
 
     // TODO: replace with true free sound or make proper attribution file
     // frozen wind chime ding by ChrisReierson -- https://freesound.org/s/383979/ -- License: Attribution 4.0
-    audioLoader.load("/assets/audio/kill_confirm.ogg", (buffer) => {
+    audioLoader.load(assetsAudioKill, (buffer) => {
       this.kill.setBuffer(buffer);
       this.kill.setVolume(0.3);
     });

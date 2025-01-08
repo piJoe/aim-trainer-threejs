@@ -8,6 +8,10 @@ import {
 import { loadTexture } from "./texture";
 import { setLoadingText } from "./loading";
 
+import assetsTextureEnvMetro from "assets/textures/env/metro.exr?url";
+import assetsTextureDarkFloor from "assets/textures/dark/texture_04.png?url";
+import assetsTextureDarkWall from "assets/textures/dark/texture_13.png?url";
+
 export enum TEXTURE_IDS {
   ENV_AUTOSHOP = "env_autoshop",
   DARK_FLOOR = "dark_floor",
@@ -70,14 +74,9 @@ async function createMaterials() {
 
 async function loadTextures(renderer: WebGLRenderer) {
   const promises = [
-    loadTexture(
-      TEXTURE_IDS.ENV_AUTOSHOP,
-      "/assets/textures/env/metro.exr",
-      {},
-      renderer
-    ),
-    loadTexture(TEXTURE_IDS.DARK_FLOOR, "assets/textures/dark/texture_04.png"),
-    loadTexture(TEXTURE_IDS.DARK_WALL, "assets/textures/dark/texture_13.png"),
+    loadTexture(TEXTURE_IDS.ENV_AUTOSHOP, assetsTextureEnvMetro, {}, renderer),
+    loadTexture(TEXTURE_IDS.DARK_FLOOR, assetsTextureDarkFloor),
+    loadTexture(TEXTURE_IDS.DARK_WALL, assetsTextureDarkWall),
   ];
 
   const textureEntries = await Promise.all(promises);
