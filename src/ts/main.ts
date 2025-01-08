@@ -23,6 +23,8 @@ import {
 import { setLoadingText, toggleLoadingScreen } from "./loading";
 import { setUserMouseSensitivity } from "./settings";
 
+import "src/style.css";
+
 const controls = new AimControls(document.body);
 
 const renderer = new WebGLRenderer();

@@ -10,8 +10,8 @@ const commonGzipOptions = {
 };
 
 export default defineConfig({
-  root: "./src",
-  publicDir: "../public",
+  root: "./",
+  publicDir: "./public",
   resolve: {
     alias: {
       src: resolve(__dirname, "./src"),
@@ -19,7 +19,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../dist",
+    outDir: "./dist",
     rollupOptions: {
       plugins: [
         gzipPlugin({
