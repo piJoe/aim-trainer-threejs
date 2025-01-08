@@ -27,11 +27,15 @@ import "src/style.css";
 
 const controls = new AimControls(document.body);
 
+// setup webgl renderer
 const renderer = new WebGLRenderer();
 renderer.autoClear = false;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = ACESFilmicToneMapping;
 document.body.appendChild(renderer.domElement);
+
+// setup ui overlay
+// m.mount(, TestComponent);
 
 const overlayCamera = new OrthographicCamera(
   -window.innerWidth / 2,
