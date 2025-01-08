@@ -8,7 +8,7 @@ import {
 import { loadTexture } from "./texture";
 import { setLoadingText } from "./loading";
 
-import assetsTextureEnvMetro from "assets/textures/env/metro.exr?url";
+import assetsTextureEnvMetro from "assets/textures/env/metro-min.exr?url";
 import assetsTextureDarkFloor from "assets/textures/dark/texture_04.png?url";
 import assetsTextureDarkWall from "assets/textures/dark/texture_13.png?url";
 

@@ -5,13 +5,14 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --emptyOutDir",
     "preview": "vite preview"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/three": "^0.171.0",
+    "rollup-plugin-gzip": "^4.0.1",
     "typescript": "^5.7.2",
     "vite": "^6.0.7"
   },
