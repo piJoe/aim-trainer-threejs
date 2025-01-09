@@ -22,20 +22,27 @@ import {
 } from "./asset-loader";
 import { setLoadingText, toggleLoadingScreen } from "./loading";
 import { setUserMouseSensitivity } from "./settings";
+import m from "mithril";
 
-import "src/style.css";
+import { OtherScreen } from "src/ts/ui/screens/other-screen";
+import { mainUI, setActiveScreen } from "src/ts/ui/ui";
 
 const controls = new AimControls(document.body);
 
 // setup webgl renderer
-const renderer = new WebGLRenderer();
+const renderer = new WebGLRenderer({
+  canvas: document.querySelector("canvas") as HTMLCanvasElement,
+});
 renderer.autoClear = false;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = ACESFilmicToneMapping;
-document.body.appendChild(renderer.domElement);
 
 // setup ui overlay
-// m.mount(, TestComponent);
+m.mount(document.getElementById("ui")!, mainUI);
+
+window.setTimeout(() => {
+  setActiveScreen(OtherScreen);
+}, 2500);
 
 const overlayCamera = new OrthographicCamera(
   -window.innerWidth / 2,

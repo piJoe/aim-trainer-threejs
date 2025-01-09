@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .bg-purple-flash {
+    background-color: #3b0953;
+    background: linear-gradient(0deg, #5a2175, #3b0953);
+    background: url("/assets/web/background-flash-purple.svg"),
+      linear-gradient(0deg, #5a2175, #3b0953);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+@layer utilities {
+  .anim-paused * {
+    animation-play-state: paused !important;
+  }
+}
