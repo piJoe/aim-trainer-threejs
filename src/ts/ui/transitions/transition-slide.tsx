@@ -1,14 +1,17 @@
 import m from "mithril";
-import { Transition, TransitionAttrs } from "src/ts/ui/transitions/transition";
+import {
+  UITransition,
+  UITransitionAttrs,
+} from "src/ts/ui/transitions/transition";
 import { sleep } from "src/ts/utils/sleep";
 
 const translateFrom = "translate-x-[-200%]";
 const translateTo = "translate-x-[200%]";
 
-export class TransitionSlideBlack extends Transition {
-  oninit(vnode: m.Vnode<TransitionAttrs>) {}
+export class TransitionSlideBlack extends UITransition {
+  oninit(vnode: m.Vnode<UITransitionAttrs>) {}
 
-  async oncreate(vnode: m.VnodeDOM<TransitionAttrs, this>) {
+  async oncreate(vnode: m.VnodeDOM<UITransitionAttrs, this>) {
     // wait a bit before starting transition
     await sleep(100);
     vnode.dom.classList.toggle(translateFrom, false);

@@ -1,5 +1,5 @@
-import { UiScreen } from "src/ts/ui/screens/ui-screen";
+import { UIScreen } from "src/ts/ui/screens/ui-screen";
 
-export class EmptyScreen extends UiScreen {
+export class EmptyScreen extends UIScreen {
   view() {}
 }

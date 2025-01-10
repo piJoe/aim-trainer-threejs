@@ -1,22 +1,25 @@
 import m from "mithril";
 import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
-import { UiScreen, UiScreenAttrs } from "src/ts/ui/screens/ui-screen";
-import { Transition, TransitionAttrs } from "src/ts/ui/transitions/transition";
+import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
+import {
+  UITransition,
+  UITransitionAttrs,
+} from "src/ts/ui/transitions/transition";
 
-let activeScreen: { new (): UiScreen } = LoadingScreen;
-let nextScreen: { new (): UiScreen };
-let transitionScreen: { new (): Transition } | null = null;
+let activeScreen: { new (): UIScreen } = LoadingScreen;
+let nextScreen: { new (): UIScreen };
+let transitionScreen: { new (): UITransition } | null = null;
 export const mainUI = {
   view: () => {
     return [
-      m<UiScreenAttrs, null>(activeScreen, {
+      m<UIScreenAttrs, null>(activeScreen, {
         createCb: () => {
           transitionScreen = null;
           m.redraw();
         },
       }),
       transitionScreen
-        ? m<TransitionAttrs, null>(transitionScreen, {
+        ? m<UITransitionAttrs, null>(transitionScreen, {
             screenSwapReadyCb: () => {
               activeScreen = nextScreen;
               m.redraw();
@@ -28,8 +31,8 @@ export const mainUI = {
 };
 
 export function setActiveScreen(
-  screen: { new (): UiScreen },
-  transition: { new (): Transition } | null = null
+  screen: { new (): UIScreen },
+  transition: { new (): UITransition } | null = null
 ) {
   if (screen === activeScreen) {
     return;
