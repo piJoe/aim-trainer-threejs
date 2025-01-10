@@ -3,8 +3,8 @@ import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
 import { UiScreen, UiScreenAttrs } from "src/ts/ui/screens/ui-screen";
 import { Transition, TransitionAttrs } from "src/ts/ui/transitions/transition";
 
-let activeScreen: typeof UiScreen = LoadingScreen;
-let nextScreen: typeof UiScreen;
+let activeScreen: { new (): UiScreen } = LoadingScreen;
+let nextScreen: { new (): UiScreen };
 let transitionScreen: { new (): Transition } | null = null;
 export const mainUI = {
   view: () => {
@@ -28,7 +28,7 @@ export const mainUI = {
 };
 
 export function setActiveScreen(
-  screen: typeof UiScreen,
+  screen: { new (): UiScreen },
   transition: { new (): Transition } | null = null
 ) {
   if (screen === activeScreen) {

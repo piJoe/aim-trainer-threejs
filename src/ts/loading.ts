@@ -23,7 +23,7 @@ function setLoadingIndicator(active: boolean) {
 
 export function toggleLoadingScreen(active: boolean) {
   if (active) {
-    setActiveScreen(LoadingScreen);
+    setActiveScreen(LoadingScreen, TransitionSlideBlack);
     return;
   }
 
