@@ -24,7 +24,10 @@ import { setLoadingText, toggleLoadingScreen } from "./loading";
 import { setUserMouseSensitivity } from "./settings";
 import m from "mithril";
 
-import { mainUI } from "src/ts/ui/ui";
+import { mainUI, setActiveScreen } from "src/ts/ui/ui";
+import { EmptyScreen } from "src/ts/ui/screens/empty-screen";
+import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
+import { sleep } from "src/ts/utils/sleep";
 
 // setup ui overlay
 m.mount(document.getElementById("ui")!, mainUI);
@@ -65,14 +68,14 @@ window.addEventListener("resize", () => {
 const audio = new AudioHandler();
 
 (async () => {
-  toggleLoadingScreen(true);
+  await toggleLoadingScreen(true);
   await loadAssets(renderer);
 
   setLoadingText("LOADING SCENARIO", "GPT Tracking V2");
   const luaStr = await (await fetch("/scenarios/v2/gpt-tracking.lua")).text();
 
   async function setupScenario() {
-    toggleLoadingScreen(true);
+    await toggleLoadingScreen(true);
     setLoadingText("SETUP SCENARIO", "GPT Tracking V2");
     const game = new Game(controls, audio);
     const luaCalls = game.getLuaCalls();
@@ -117,13 +120,14 @@ const audio = new AudioHandler();
     scene.updateMatrixWorld();
     renderer.setAnimationLoop(render);
 
-    toggleLoadingScreen(false);
+    await toggleLoadingScreen(false);
+    await sleep(1000);
   }
 
   await setupScenario();
 
   async function test() {
-    toggleLoadingScreen(false);
+    await toggleLoadingScreen(false);
 
     const game = new Game(controls, audio);
     const { scene, camera } = await game.setup({ handleInit: () => {} } as any);

@@ -7,21 +7,41 @@ import {
 } from "src/ts/ui/transitions/transition";
 
 let activeScreen: { new (): UIScreen } = LoadingScreen;
-let nextScreen: { new (): UIScreen };
-let transitionScreen: { new (): UITransition } | null = null;
+// let nextScreen: { new (): UIScreen } | null = null;
+// let transitionScreen: { new (): UITransition } | null = null;
+let nextScreens: {
+  screen: { new (): UIScreen };
+  transition: { new (): UITransition } | null;
+}[] = [];
 export const mainUI = {
   view: () => {
+    const nextScreen = nextScreens.at(0);
+    if (nextScreen) {
+      if (
+        nextScreen.transition === null ||
+        nextScreen.screen === activeScreen
+      ) {
+        if (nextScreen.screen === activeScreen) {
+          nextScreens.shift();
+        }
+
+        activeScreen = nextScreen.screen;
+        nextScreen.transition = null;
+      }
+    }
+
     return [
       m<UIScreenAttrs, null>(activeScreen, {
         createCb: () => {
-          transitionScreen = null;
-          m.redraw();
+          // m.redraw();
         },
       }),
-      transitionScreen
-        ? m<UITransitionAttrs, null>(transitionScreen, {
+      nextScreen?.transition
+        ? m<UITransitionAttrs, null>(nextScreen.transition, {
             screenSwapReadyCb: () => {
-              activeScreen = nextScreen;
+              if (nextScreen) {
+                activeScreen = nextScreen.screen;
+              }
               m.redraw();
             },
           })
@@ -34,17 +54,13 @@ export function setActiveScreen(
   screen: { new (): UIScreen },
   transition: { new (): UITransition } | null = null
 ) {
-  if (screen === activeScreen) {
+  if (nextScreens.at(-1)?.screen === screen) {
     return;
   }
 
-  if (!transition) {
-    activeScreen = screen;
-    m.redraw();
-    return;
-  }
-
-  transitionScreen = transition;
-  nextScreen = screen;
+  nextScreens.push({
+    screen,
+    transition,
+  });
   m.redraw();
 }
