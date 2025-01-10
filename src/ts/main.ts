@@ -24,8 +24,10 @@ import { setLoadingText, toggleLoadingScreen } from "./loading";
 import { setUserMouseSensitivity } from "./settings";
 import m from "mithril";
 
-import { OtherScreen } from "src/ts/ui/screens/other-screen";
-import { mainUI, setActiveScreen } from "src/ts/ui/ui";
+import { mainUI } from "src/ts/ui/ui";
+
+// setup ui overlay
+m.mount(document.getElementById("ui")!, mainUI);
 
 const controls = new AimControls(document.body);
 
@@ -36,13 +38,6 @@ const renderer = new WebGLRenderer({
 renderer.autoClear = false;
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = ACESFilmicToneMapping;
-
-// setup ui overlay
-m.mount(document.getElementById("ui")!, mainUI);
-
-window.setTimeout(() => {
-  setActiveScreen(OtherScreen);
-}, 2500);
 
 const overlayCamera = new OrthographicCamera(
   -window.innerWidth / 2,

@@ -30,7 +30,17 @@ export const mainUI = {
   },
 };
 
-export function setActiveScreen(screen: typeof UiScreen) {
+export function setActiveScreen(screen: typeof UiScreen, transition = true) {
+  if (screen === activeScreen) {
+    return;
+  }
+
+  if (!transition) {
+    activeScreen = screen;
+    m.redraw();
+    return;
+  }
+
   isSwitchingScreen = true;
   nextScreen = screen;
   m.redraw();

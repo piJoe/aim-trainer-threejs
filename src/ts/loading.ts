@@ -1,31 +1,31 @@
-// const loadingScreenDOM = document.querySelector(".loading-screen")!;
-// const loadingHintDOM = document.querySelector(".loading-hint")!;
+import m from "mithril";
+import { EmptyScreen } from "src/ts/ui/screens/empty-screen";
+import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
+import { setActiveScreen } from "src/ts/ui/ui";
+
+export const globalLoadingState = {
+  title: "",
+  description: "",
+  paused: false,
+};
 
 export function setLoadingText(title: string, desc?: string) {
   setLoadingIndicator(true);
-  // loadingHintDOM.querySelector(".loading-title")!.textContent =
-  // title.toUpperCase();
-  // loadingHintDOM.querySelector(".loading-desc")!.textContent =
-  // desc?.toUpperCase() ?? "";
+  globalLoadingState.title = title;
+  globalLoadingState.description = desc ?? "";
+  m.redraw();
 }
 
-export function setLoadingIndicator(active: boolean) {
-  // loadingHintDOM
-  //   .querySelector(".loading-indicator")
-  //   ?.classList.toggle("paused", !active);
+function setLoadingIndicator(active: boolean) {
+  globalLoadingState.paused = !active;
 }
 
 export function toggleLoadingScreen(active: boolean) {
   if (active) {
-    // loadingScreenDOM.classList.toggle("loading-done", false);
-    // loadingScreenDOM.classList.toggle("loading-fade", false);
+    setActiveScreen(LoadingScreen, false);
     return;
   }
 
   setLoadingIndicator(false);
-  // loadingScreenDOM.classList.toggle("loading-fade", true);
-  window.setTimeout(() => {
-    // loadingScreenDOM.classList.toggle("loading-done", true);
-    // loadingScreenDOM.classList.toggle("loading-fade", false);
-  }, 1000);
+  setActiveScreen(EmptyScreen);
 }

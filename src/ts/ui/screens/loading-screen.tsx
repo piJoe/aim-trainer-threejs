@@ -3,6 +3,7 @@ import { LoadingIndicator } from "src/ts/ui/components/loading-indicator";
 
 import logoStr from "assets/web/logo.svg?raw";
 import { UiScreen } from "src/ts/ui/screens/ui-screen";
+import { globalLoadingState } from "src/ts/loading";
 const logoSvg = m.trust(logoStr);
 
 export class LoadingScreen extends UiScreen {
@@ -13,8 +14,9 @@ export class LoadingScreen extends UiScreen {
           {logoSvg}
         </div>
         <LoadingIndicator
-          loadingTitle="LOADING"
-          loadingDesc="SOME DESCRIPTION"
+          loadingTitle={globalLoadingState.title}
+          loadingDesc={globalLoadingState.description}
+          paused={globalLoadingState.paused}
         ></LoadingIndicator>
       </div>
     );
