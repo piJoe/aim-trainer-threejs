@@ -1,25 +1,14 @@
 import m from "mithril";
+import { Transition, TransitionAttrs } from "src/ts/ui/transitions/transition";
 import { sleep } from "src/ts/utils/sleep";
 
 const translateFrom = "translate-x-[-200%]";
 const translateTo = "translate-x-[200%]";
 
-export interface TransitionSlideAttrs {
-  callback?: () => void;
-}
+export class TransitionSlideBlack extends Transition {
+  oninit(vnode: m.Vnode<TransitionAttrs>) {}
 
-export class TransitionSlideBlack
-  implements m.ClassComponent<TransitionSlideAttrs>
-{
-  private callback?: () => void;
-
-  oninit(vnode: m.Vnode<TransitionSlideAttrs>) {
-    if (vnode.attrs.callback) {
-      this.callback = vnode.attrs.callback;
-    }
-  }
-
-  async oncreate(vnode: m.VnodeDOM) {
+  async oncreate(vnode: m.VnodeDOM<TransitionAttrs, this>) {
     // wait a bit before starting transition
     await sleep(100);
     vnode.dom.classList.toggle(translateFrom, false);
@@ -27,8 +16,7 @@ export class TransitionSlideBlack
     // then wait for animation to finish + some delay
     await sleep(500);
 
-    // switch scene in background here!
-    if (this.callback) this.callback();
+    super.oncreate(vnode);
   }
 
   async onbeforeremove(vnode: m.VnodeDOM): Promise<any> {

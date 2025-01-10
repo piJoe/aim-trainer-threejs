@@ -1,6 +1,7 @@
 import m from "mithril";
 import { EmptyScreen } from "src/ts/ui/screens/empty-screen";
 import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
+import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
 import { setActiveScreen } from "src/ts/ui/ui";
 
 export const globalLoadingState = {
@@ -22,10 +23,10 @@ function setLoadingIndicator(active: boolean) {
 
 export function toggleLoadingScreen(active: boolean) {
   if (active) {
-    setActiveScreen(LoadingScreen, false);
+    setActiveScreen(LoadingScreen);
     return;
   }
 
   setLoadingIndicator(false);
-  setActiveScreen(EmptyScreen);
+  setActiveScreen(EmptyScreen, TransitionSlideBlack);
 }
