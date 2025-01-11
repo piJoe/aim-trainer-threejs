@@ -6,6 +6,12 @@ export class InGameScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
   view() {
-    return <canvas />;
+    return (
+      <div>
+        <canvas />
+        {/*TODO: add ingame overlay, visible only when running*/}
+        {/*TODO: add ingame pause menu, visible only when paused*/}
+      </div>
+    );
   }
 }

@@ -10,10 +10,10 @@ import {
 } from "three";
 import { Target } from "./game-objects/target";
 import { AimControls, ClickEventType } from "./aim-controls";
-import { AudioHandler } from "./audio";
 import { getAspectRatio, getFov } from "./settings";
 import { LuaHandlers } from "./luaScenario";
 import { MATERIAL_IDS, MATERIALS } from "./asset-loader";
+import { audioHandler } from "src/ts/audio";
 
 interface GameConfig {
   roomSize: { x: number; y: number; z: number };
@@ -60,10 +60,7 @@ export class Game {
   private totalShots = 0;
   private shotsHit = 0;
 
-  constructor(
-    private controls: AimControls,
-    public audioHandler: AudioHandler
-  ) {
+  constructor(private controls: AimControls) {
     this.controls.setCamera(this.camera);
   }
 
@@ -221,9 +218,9 @@ export class Game {
       this.handlers?.handleTargetHit(target.id);
       target.onHit();
       this.shotsHit++;
-      this.audioHandler.playHit();
+      audioHandler.playHit();
     } else {
-      this.audioHandler.playMiss();
+      audioHandler.playMiss();
     }
     this.totalShots++;
   }

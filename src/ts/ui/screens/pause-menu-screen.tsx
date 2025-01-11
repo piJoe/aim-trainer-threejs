@@ -2,6 +2,7 @@ import m from "mithril";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
+import { audioHandler } from "src/ts/audio";
 const logoSvg = m.trust(logoStr);
 
 interface MenuEntryAttrs {
@@ -12,8 +13,11 @@ class MenuEntry implements m.ClassComponent<MenuEntryAttrs> {
   view(vnode: m.Vnode<MenuEntryAttrs, this>): m.Children {
     return (
       <li
-        class="w-fit cursor-pointer text-white hover:bg-white hover:text-black"
+        class="w-fit cursor-pointer text-white hover:bg-primary hover:text-black"
         onclick={vnode.attrs.onclick}
+        onmouseover={() => {
+          audioHandler.playMiss();
+        }}
       >
         {vnode.attrs.label}
       </li>
@@ -23,12 +27,24 @@ class MenuEntry implements m.ClassComponent<MenuEntryAttrs> {
 
 interface KeyboardHintAttrs {
   key: string;
+  interactable?: boolean;
 }
 class KeyboardHint implements m.ClassComponent<KeyboardHintAttrs> {
   view(vnode: m.Vnode<KeyboardHintAttrs, this>): m.Children {
     return (
-      <li>
-        <span class="border-2 border-white/80 px-2 py-1 rounded-md mr-5">
+      <li
+        class={[
+          "group",
+          vnode.attrs.interactable && "cursor-pointer hover:text-primary",
+        ].join(" ")}
+      >
+        <span
+          class={[
+            "border-2 border-white/80 px-2 py-1 rounded-md mr-2",
+            vnode.attrs.interactable &&
+              "group-hover:bg-primary group-hover:border-primary group-hover:text-black",
+          ].join(" ")}
+        >
           {vnode.attrs.key}
         </span>
         {vnode.children}
@@ -37,7 +53,7 @@ class KeyboardHint implements m.ClassComponent<KeyboardHintAttrs> {
   }
 }
 
-// basically just a hack for an empty UI above the game canvas
+// TODO: consider PauseMenuScreen it's own class, not dependent on UIScreen (since it should only be hooked in ingame-screen.tsx)
 export class PauseMenuScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
@@ -58,7 +74,10 @@ export class PauseMenuScreen
             <div class="text-sm">Current Scenario:</div>
             <div class="text-xl">GPT Tracking V2</div>
           </div>
-          <ul class="ml-auto block text-xl">
+          <ul class="ml-auto text-xl flex flex-row gap-5">
+            <KeyboardHint key="ESC" interactable>
+              Main Menu
+            </KeyboardHint>
             <KeyboardHint key="F11">Fullscreen</KeyboardHint>
           </ul>
         </div>

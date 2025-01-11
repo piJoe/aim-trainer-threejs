@@ -5,11 +5,11 @@ import assetsAudioMiss from "assets/audio/miss.ogg?url";
 import assetsAudioKill from "assets/audio/kill_confirm.ogg?url";
 import { userAudioSettings } from "src/ts/stores/user-settings";
 
-export class AudioHandler {
-  listener = new AudioListener();
-  miss: Audio;
-  hit: Audio;
-  kill: Audio;
+class AudioHandler {
+  private listener = new AudioListener();
+  private miss: Audio;
+  private hit: Audio;
+  private kill: Audio;
 
   constructor() {
     this.miss = new Audio(this.listener);
@@ -57,3 +57,6 @@ export class AudioHandler {
     this.kill.play();
   }
 }
+
+export type { AudioHandler };
+export const audioHandler = new AudioHandler();

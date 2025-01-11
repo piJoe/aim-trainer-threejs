@@ -11,7 +11,6 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
-import { AudioHandler } from "./audio";
 import { runLuaScenario } from "./luaScenario";
 import {
   loadAssets,
@@ -63,8 +62,6 @@ window.addEventListener("resize", () => {
   overlayCamera.updateProjectionMatrix();
 });
 
-const audio = new AudioHandler();
-
 (async () => {
   await toggleLoadingScreen(true);
   await loadAssets(renderer);
@@ -76,7 +73,7 @@ const audio = new AudioHandler();
     await toggleLoadingScreen(true);
     await sleep(300);
     setLoadingText("SETUP SCENARIO", "GPT Switching V2");
-    const game = new Game(controls, audio);
+    const game = new Game(controls);
     const luaCalls = game.getLuaCalls();
     const handlers = await runLuaScenario(luaCalls, luaStr);
 
@@ -128,7 +125,7 @@ const audio = new AudioHandler();
   async function test() {
     await toggleLoadingScreen(false);
 
-    const game = new Game(controls, audio);
+    const game = new Game(controls);
     const { scene, camera } = await game.setup({ handleInit: () => {} } as any);
     scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
 
