@@ -1,8 +1,8 @@
 import m from "mithril";
 import { LoadingIndicator } from "src/ts/ui/components/loading-indicator";
+import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
-import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 const logoSvg = m.trust(logoStr);
 
 export class LoadingScreen

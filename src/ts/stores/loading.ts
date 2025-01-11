@@ -1,6 +1,6 @@
 import { map } from "nanostores";
-import { EmptyScreen } from "src/ts/ui/screens/empty-screen";
 import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
+import { PauseMenuScreen } from "src/ts/ui/screens/pause-menu-screen";
 import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
 import { setActiveScreen } from "src/ts/ui/ui";
 
@@ -32,5 +32,5 @@ export function toggleLoadingScreen(active: boolean) {
   }
 
   loadingState.setKey("paused", true);
-  setActiveScreen(EmptyScreen, TransitionSlideBlack);
+  setActiveScreen(PauseMenuScreen, TransitionSlideBlack);
 }
