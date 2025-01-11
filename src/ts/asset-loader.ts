@@ -6,11 +6,11 @@ import {
   WebGLRenderer,
 } from "three";
 import { loadTexture } from "./texture";
-import { setLoadingText } from "./loading";
 
 import assetsTextureEnvMetro from "assets/textures/env/metro-min.exr?url";
 import assetsTextureDarkFloor from "assets/textures/dark/texture_04.png?url";
 import assetsTextureDarkWall from "assets/textures/dark/texture_13.png?url";
+import { setLoadingText } from "src/ts/stores/loading";
 
 export enum TEXTURE_IDS {
   ENV_AUTOSHOP = "env_autoshop",

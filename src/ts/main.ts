@@ -20,14 +20,12 @@ import {
   TEXTURE_IDS,
   TEXTURES,
 } from "./asset-loader";
-import { setLoadingText, toggleLoadingScreen } from "./loading";
 import { setUserMouseSensitivity } from "./settings";
 import m from "mithril";
 
-import { mainUI, setActiveScreen } from "src/ts/ui/ui";
-import { EmptyScreen } from "src/ts/ui/screens/empty-screen";
-import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
+import { mainUI } from "src/ts/ui/ui";
 import { sleep } from "src/ts/utils/sleep";
+import { setLoadingText, toggleLoadingScreen } from "src/ts/stores/loading";
 
 // setup ui overlay
 m.mount(document.getElementById("ui")!, mainUI);
@@ -71,12 +69,13 @@ const audio = new AudioHandler();
   await toggleLoadingScreen(true);
   await loadAssets(renderer);
 
-  setLoadingText("LOADING SCENARIO", "GPT Tracking V2");
-  const luaStr = await (await fetch("/scenarios/v2/gpt-tracking.lua")).text();
+  setLoadingText("LOADING SCENARIO", "GPT Switching V2");
+  const luaStr = await (await fetch("/scenarios/v2/gpt-switching.lua")).text();
 
   async function setupScenario() {
     await toggleLoadingScreen(true);
-    setLoadingText("SETUP SCENARIO", "GPT Tracking V2");
+    await sleep(300);
+    setLoadingText("SETUP SCENARIO", "GPT Switching V2");
     const game = new Game(controls, audio);
     const luaCalls = game.getLuaCalls();
     const handlers = await runLuaScenario(luaCalls, luaStr);
