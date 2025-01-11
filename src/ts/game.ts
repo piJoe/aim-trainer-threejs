@@ -28,6 +28,8 @@ export class Game {
   private raycastCam = this.camera.clone();
   private raycaster = new Raycaster();
 
+  public audioHandler = audioHandler;
+
   // private shotRenderer = new WebGLRenderer();
 
   private gameConfig: GameConfig = {

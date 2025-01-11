@@ -25,9 +25,16 @@ import m from "mithril";
 import { mainUI } from "src/ts/ui/ui";
 import { sleep } from "src/ts/utils/sleep";
 import { setLoadingText, toggleLoadingScreen } from "src/ts/stores/loading";
+import { setupRenderer } from "src/ts/renderer";
 
 // setup ui overlay
 m.mount(document.getElementById("ui")!, mainUI);
+
+(async () => {
+  await setupRenderer();
+})();
+
+/** TODO: remove me
 
 const controls = new AimControls(document.body);
 
@@ -195,3 +202,5 @@ window.addEventListener("resize", () => {
     setUserMouseSensitivity(parseFloat(cmPer360), parseInt(dpi));
   });
 })();
+
+*/

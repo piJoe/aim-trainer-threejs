@@ -1,6 +1,6 @@
 import { map } from "nanostores";
+import { InGameScreen } from "src/ts/ui/screens/ingame/ingame-screen";
 import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
-import { PauseMenuScreen } from "src/ts/ui/screens/pause-menu-screen";
 import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
 import { setActiveScreen } from "src/ts/ui/ui";
 
@@ -24,6 +24,10 @@ export function setLoadingText(title: string, desc?: string) {
   });
 }
 
+export function setLoadingPaused(paused: boolean) {
+  loadingState.setKey("paused", paused);
+}
+
 export function toggleLoadingScreen(active: boolean) {
   if (active) {
     loadingState.setKey("paused", false);
@@ -32,5 +36,5 @@ export function toggleLoadingScreen(active: boolean) {
   }
 
   loadingState.setKey("paused", true);
-  setActiveScreen(PauseMenuScreen, TransitionSlideBlack);
+  setActiveScreen(InGameScreen, TransitionSlideBlack);
 }

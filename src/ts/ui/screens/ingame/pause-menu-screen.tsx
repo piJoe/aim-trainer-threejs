@@ -1,8 +1,8 @@
 import m from "mithril";
-import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
 import { audioHandler } from "src/ts/audio";
+import { renderInstance } from "src/ts/renderer";
 const logoSvg = m.trust(logoStr);
 
 interface MenuEntryAttrs {
@@ -54,16 +54,18 @@ class KeyboardHint implements m.ClassComponent<KeyboardHintAttrs> {
 }
 
 // TODO: consider PauseMenuScreen it's own class, not dependent on UIScreen (since it should only be hooked in ingame-screen.tsx)
-export class PauseMenuScreen
-  extends UIScreen
-  implements m.ClassComponent<UIScreenAttrs>
-{
+export class PauseMenuScreen implements m.ClassComponent {
   view() {
     return (
-      <div class="h-full flex flex-col backdrop-blur-xl bg-black bg-opacity-50 p-16">
+      <div class="absolute inset-0 flex flex-col backdrop-blur-xl bg-black bg-opacity-50 p-16">
         <div class="w-[120px] text-primary">{logoSvg}</div>
         <ul class="my-auto text-6xl/normal flex flex-col gap-5">
-          <MenuEntry label="Continue" onclick={() => {}} />
+          <MenuEntry
+            label="Continue"
+            onclick={() => {
+              renderInstance.controls?.lock();
+            }}
+          />
           <MenuEntry label="Restart" onclick={() => {}} />
           <MenuEntry label="Choose Scenario" onclick={() => {}} />
           <MenuEntry label="Editor" onclick={() => {}} />
