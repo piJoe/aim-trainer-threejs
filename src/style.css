@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  @font-face {
+    font-family: "Roboto";
+    font-optical-sizing: auto;
+    font-style: italic;
+    font-display: block;
+    font-stretch: 75% 100;
+    font-weight: 400 700;
+    src: url(/assets/web/fonts/Roboto-Italic-VariableFont_wdth\,wght.ttf)
+      format(opentype) tech(variations);
+  }
+  @font-face {
+    font-family: "Roboto";
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-display: block;
+    font-stretch: 75% 100;
+    font-weight: 400 700;
+    src: url(/assets/web/fonts/Roboto-VariableFont_wdth\,wght.ttf)
+      format(opentype) tech(variations);
+  }
+
+  html {
+    font-family: "Roboto", system-ui, sans-serif;
+    font-variation-settings: "wdth" 75;
+    text-transform: uppercase;
+
+    user-select: none;
+  }
+}
+
 @layer components {
   .bg-purple-flash {
     background-color: #3b0953;

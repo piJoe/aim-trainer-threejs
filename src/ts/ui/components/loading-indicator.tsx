@@ -27,7 +27,7 @@ export class LoadingIndicator implements m.ClassComponent {
         ].join(" ")}
       >
         <div class="flex flex-col text-right uppercase">
-          <div class="text-2xl">{loading.title}</div>
+          <div class="text-2xl font-medium">{loading.title}</div>
           <div class="text-lg">{loading.description}</div>
         </div>
         <div

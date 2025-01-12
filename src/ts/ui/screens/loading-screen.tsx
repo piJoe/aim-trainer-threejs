@@ -30,7 +30,10 @@ export class LoadingScreen
 
     return (
       <div
-        class="h-full bg-purple-flash flex items-center justify-center flex-col gap-5 p-16"
+        class={[
+          "h-full bg-purple-flash flex items-center justify-center flex-col gap-5 p-16",
+          paused ? "cursor-pointer" : "cursor-default",
+        ].join(" ")}
         onclick={() => {
           if (!paused) return;
           setActiveScreen(InGameScreen, TransitionSlideBlack);
@@ -41,7 +44,7 @@ export class LoadingScreen
         </div>
         <div
           class={[
-            "text-2xl text-white",
+            "text-3xl font-semibold italic text-white",
             paused ? "animate-pulse" : "opacity-0",
           ].join(" ")}
         >

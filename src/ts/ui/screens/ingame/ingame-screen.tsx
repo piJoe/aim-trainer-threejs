@@ -15,6 +15,7 @@ export class InGameScreen
 {
   async oninit(vnode: m.Vnode<UIScreenAttrs, this>) {
     setLoadingText("LOADING SCENARIO", "GPT Switching V2");
+
     const luaStr = await (
       await fetch("/scenarios/v2/gpt-switching.lua")
     ).text();
@@ -82,7 +83,6 @@ export class InGameScreen
   }
 
   view() {
-    console.log(renderInstance.controls?.isLocked);
     return (
       <div>
         {/*TODO: add ingame overlay, visible only when running*/}
