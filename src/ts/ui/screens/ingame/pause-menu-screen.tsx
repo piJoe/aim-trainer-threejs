@@ -67,9 +67,12 @@ export class PauseMenuScreen implements m.ClassComponent {
               renderInstance.controls?.lock();
             }}
           />
-          <MenuEntry label="Restart" onclick={() => {}} />
-          <MenuEntry label="Choose Scenario" onclick={() => {}} />
-          <MenuEntry label="Editor" onclick={() => {}} />
+          <MenuEntry
+            label="Restart"
+            onclick={() => {
+              // TODO: somehow retrigger the oninit method in the ingame-screen.tsx, maybe by event?
+            }}
+          />
           <MenuEntry label="Settings" onclick={() => {}} />
         </ul>
         <div class="flex flex-row items-end">

@@ -7,8 +7,6 @@ import {
 } from "src/ts/ui/transitions/transition";
 
 let activeScreen: { new (): UIScreen } = LoadingScreen;
-// let nextScreen: { new (): UIScreen } | null = null;
-// let transitionScreen: { new (): UITransition } | null = null;
 let nextScreens: {
   screen: { new (): UIScreen };
   transition: { new (): UITransition } | null;
