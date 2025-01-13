@@ -1,8 +1,9 @@
 import m from "mithril";
-
-import logoStr from "assets/web/logo.svg?raw";
 import { audioHandler } from "src/ts/audio";
 import { renderInstance } from "src/ts/renderer";
+import { SettingsScreen } from "src/ts/ui/screens/settings-screen";
+
+import logoStr from "assets/web/logo.svg?raw";
 const logoSvg = m.trust(logoStr);
 
 interface MenuEntryAttrs {
@@ -56,6 +57,8 @@ class KeyboardHint implements m.ClassComponent<KeyboardHintAttrs> {
 
 // TODO: consider PauseMenuScreen it's own class, not dependent on UIScreen (since it should only be hooked in ingame-screen.tsx)
 export class PauseMenuScreen implements m.ClassComponent {
+  private settingsOpen = false;
+
   view() {
     return (
       <div class="absolute inset-0 flex flex-col backdrop-blur-xl bg-black bg-opacity-50 p-16">
@@ -73,7 +76,12 @@ export class PauseMenuScreen implements m.ClassComponent {
               // TODO: somehow retrigger the oninit method in the ingame-screen.tsx, maybe by event?
             }}
           />
-          <MenuEntry label="Settings" onclick={() => {}} />
+          <MenuEntry
+            label="Settings"
+            onclick={() => {
+              this.settingsOpen = true;
+            }}
+          />
         </ul>
         <div class="flex flex-row items-end">
           <div class="text-white">
@@ -87,6 +95,12 @@ export class PauseMenuScreen implements m.ClassComponent {
             <KeyboardHint key="F11">Fullscreen</KeyboardHint>
           </ul>
         </div>
+
+        {this.settingsOpen && (
+          <div class="absolute inset-0">
+            <SettingsScreen />
+          </div>
+        )}
       </div>
     );
   }
