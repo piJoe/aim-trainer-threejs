@@ -25,18 +25,31 @@ class SettingsEntrySlider
           <span class="basis-[52px] shrink-0 text-right">
             {(vnode.attrs.value * 100).toFixed(0)}%
           </span>
-          <input
-            class="w-full accent-primary outline-none appearance-none h-2 bg-white/30 rounded"
-            type="range"
-            min={0}
-            max={1}
-            step={0.01}
-            value={vnode.attrs.value}
-            oninput={(e: InputEvent) => {
-              const val = (e.target as HTMLInputElement).value;
-              vnode.attrs.onchange(parseFloat(val));
-            }}
-          />
+          <div class="w-full relative flex flex-row items-center">
+            <input
+              class="w-full appearance-none h-5 opacity-0"
+              type="range"
+              min={0}
+              max={1}
+              step={0.01}
+              value={vnode.attrs.value}
+              oninput={(e: InputEvent) => {
+                const val = (e.target as HTMLInputElement).value;
+                vnode.attrs.onchange(parseFloat(val));
+              }}
+            />
+            <div class="w-full pointer-events-none h-2 rounded bg-white/30 absolute"></div>
+            <div
+              class="pointer-events-none h-2 rounded bg-primary absolute"
+              style={`width: ${vnode.attrs.value * 100}%;`}
+            ></div>
+            <div class="inset-x-2.5 h-5 absolute pointer-events-none">
+              <div
+                class="pointer-events-none h-5 w-5 rounded-full bg-white absolute"
+                style={`left: calc(${vnode.attrs.value * 100}% - 10px);`}
+              ></div>
+            </div>
+          </div>
         </div>
       </div>
     );
