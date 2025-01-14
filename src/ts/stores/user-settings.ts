@@ -29,7 +29,7 @@ export const userMouseSettingsSensC = computed(
   }
 );
 
-interface UserAudioSettings {
+export interface UserAudioSettings {
   volumeMiss: number;
   volumeHit: number;
   volumeKill: number;

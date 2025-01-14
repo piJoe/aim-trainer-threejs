@@ -7,6 +7,7 @@ import { loadingState } from "src/ts/stores/loading";
 import { setActiveScreen } from "src/ts/ui/ui";
 import { InGameScreen } from "src/ts/ui/screens/ingame/ingame-screen";
 import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
+import { audioHandler } from "src/ts/audio";
 const logoSvg = m.trust(logoStr);
 
 export class LoadingScreen
@@ -36,6 +37,7 @@ export class LoadingScreen
         ].join(" ")}
         onclick={() => {
           if (!paused) return;
+          audioHandler.setup();
           setActiveScreen(InGameScreen, TransitionSlideBlack);
         }}
       >
