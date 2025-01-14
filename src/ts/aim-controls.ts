@@ -1,6 +1,6 @@
 import m from "mithril";
+import { userMouseSettingsSensC } from "src/ts/stores/user-settings";
 import { Camera, Euler, Quaternion, Vector3 } from "three";
-import { getMouseSens } from "./settings";
 
 const PI_2 = Math.PI / 2;
 
@@ -22,7 +22,7 @@ export class AimControls {
   private minPolarAngle = 0;
   private maxPolarAngle = Math.PI;
   private euler = new Euler(0, 0, 0, "YXZ");
-  private mouseSensitivity = getMouseSens();
+  private mouseSensitivity = userMouseSettingsSensC.get();
   private clickEventQueue: ClickEvent[] = [];
   private mouseDown = false;
 
@@ -44,9 +44,8 @@ export class AimControls {
       this.onPointerUpEvent.bind(this)
     );
 
-    window.addEventListener("mouse_sens", () => {
-      this.mouseSensitivity = getMouseSens();
-      console.log(this.mouseSensitivity);
+    userMouseSettingsSensC.subscribe((sens) => {
+      this.mouseSensitivity = sens;
     });
   }
 

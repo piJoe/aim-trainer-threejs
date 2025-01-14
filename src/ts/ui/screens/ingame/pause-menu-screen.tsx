@@ -4,6 +4,7 @@ import { renderInstance } from "src/ts/renderer";
 import { SettingsScreen } from "src/ts/ui/screens/settings-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
+import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
 const logoSvg = m.trust(logoStr);
 
 interface MenuEntryAttrs {
@@ -27,37 +28,8 @@ class MenuEntry implements m.ClassComponent<MenuEntryAttrs> {
   }
 }
 
-interface KeyboardHintAttrs {
-  key: string;
-  interactable?: boolean;
-}
-class KeyboardHint implements m.ClassComponent<KeyboardHintAttrs> {
-  view(vnode: m.Vnode<KeyboardHintAttrs, this>): m.Children {
-    return (
-      <li
-        class={[
-          "group font-medium text-white",
-          vnode.attrs.interactable && "cursor-pointer hover:text-primary",
-        ].join(" ")}
-      >
-        <span
-          class={[
-            "border-2 border-white/80 px-2 py-1 rounded-md mr-2 font-semibold",
-            vnode.attrs.interactable &&
-              "group-hover:bg-primary group-hover:border-primary group-hover:text-black",
-          ].join(" ")}
-        >
-          {vnode.attrs.key}
-        </span>
-        {vnode.children}
-      </li>
-    );
-  }
-}
-
-// TODO: consider PauseMenuScreen it's own class, not dependent on UIScreen (since it should only be hooked in ingame-screen.tsx)
 export class PauseMenuScreen implements m.ClassComponent {
-  private settingsOpen = false;
+  public settingsOpen = false;
 
   view() {
     return (
@@ -98,7 +70,7 @@ export class PauseMenuScreen implements m.ClassComponent {
 
         {this.settingsOpen && (
           <div class="absolute inset-0">
-            <SettingsScreen />
+            <SettingsScreen parent={this} />
           </div>
         )}
       </div>

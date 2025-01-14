@@ -9,5 +9,5 @@ export abstract class UIScreen implements m.ClassComponent<UIScreenAttrs> {
     if (vnode.attrs.createCb) vnode.attrs.createCb();
   }
 
-  view() {}
+  view(vnode: m.Vnode) {}
 }

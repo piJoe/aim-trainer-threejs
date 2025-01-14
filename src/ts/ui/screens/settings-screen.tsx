@@ -1,12 +1,16 @@
 import m from "mithril";
+import {
+  userAudioSettings,
+  userMouseSettings,
+} from "src/ts/stores/user-settings";
+import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
+import { PauseMenuScreen } from "src/ts/ui/screens/ingame/pause-menu-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 
 interface SettingsEntrySliderAttrs {
   label: string;
-  value: string;
-  min?: string;
-  max?: string;
-  step?: string;
+  value: number;
+  onchange: (newVal: number) => void;
 }
 class SettingsEntrySlider
   implements m.ClassComponent<SettingsEntrySliderAttrs>
@@ -18,14 +22,20 @@ class SettingsEntrySlider
           {vnode.attrs.label}
         </div>
         <div class="basis-1/3 px-6 flex flex-row items-center gap-6 text-2xl font-medium">
-          <span>{vnode.attrs.value}</span>
+          <span class="basis-[52px] shrink-0 text-right">
+            {(vnode.attrs.value * 100).toFixed(0)}%
+          </span>
           <input
             class="w-full accent-primary outline-none appearance-none h-2 bg-white/30 rounded"
             type="range"
-            min={vnode.attrs.min}
-            max={vnode.attrs.max}
-            step={vnode.attrs.step}
+            min={0}
+            max={1}
+            step={0.01}
             value={vnode.attrs.value}
+            oninput={(e: InputEvent) => {
+              const val = (e.target as HTMLInputElement).value;
+              vnode.attrs.onchange(parseFloat(val));
+            }}
           />
         </div>
       </div>
@@ -35,10 +45,11 @@ class SettingsEntrySlider
 
 interface SettingsEntryNumberAttrs {
   label: string;
-  value: string;
-  min?: string;
-  max?: string;
-  step?: string;
+  value: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  onchange: (newVal: number) => void;
 }
 class SettingsEntryNumber
   implements m.ClassComponent<SettingsEntryNumberAttrs>
@@ -56,6 +67,10 @@ class SettingsEntryNumber
           max={vnode.attrs.max}
           step={vnode.attrs.step}
           value={vnode.attrs.value}
+          oninput={(e: InputEvent) => {
+            const val = (e.target as HTMLInputElement).value;
+            vnode.attrs.onchange(parseFloat(val));
+          }}
         />
       </div>
     );
@@ -66,51 +81,92 @@ export class SettingsScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
-  view() {
+  private parent!: PauseMenuScreen;
+  private keyUpListener!: any;
+
+  oninit(vnode: m.Vnode<UIScreenAttrs, this>) {
+    this.parent = (vnode.attrs as any).parent as PauseMenuScreen;
+  }
+
+  oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
+    this.keyUpListener = this.keyUpEvent.bind(this);
+    document.addEventListener("keyup", this.keyUpListener);
+  }
+  onremove(vnode: m.VnodeDOM<UIScreenAttrs, this>) {
+    document.removeEventListener("keyup", this.keyUpListener);
+  }
+
+  keyUpEvent(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      // TODO: don't do this, this sucks! will need a proper way to close open screens. maybe implement some kind of stack in the main ui.ts
+      this.parent.settingsOpen = false;
+      m.redraw();
+    }
+  }
+
+  view(vnode: m.Vnode<UIScreenAttrs, this>) {
+    const mouseSettings = userMouseSettings.get();
+    const audioSettings = userAudioSettings.get();
+
     return (
       <div class="h-full bg-purple-flash flex items-center justify-center flex-col gap-5 p-16">
-        <div class="w-full max-w-[1200px] text-white">
+        <div class="w-full max-w-[1200px] my-auto text-white">
           <h2 class="font-semibold text-3xl mb-2">Mouse</h2>
           <SettingsEntryNumber
             label="CM/360°"
-            value="35"
+            value={mouseSettings.cmPer360}
             min="1"
             step="0.1"
+            onchange={(val: number) => {
+              userMouseSettings.setKey("cmPer360", val);
+            }}
           ></SettingsEntryNumber>
           <SettingsEntryNumber
             label="DPI"
-            value="800"
+            value={mouseSettings.dpi}
             min="1"
-          ></SettingsEntryNumber>
-          <SettingsEntryNumber
-            label="Sensitivity"
-            value="12.54"
-            min="0.01"
-            step="0.01"
+            onchange={(val: number) => {
+              userMouseSettings.setKey("dpi", val);
+            }}
           ></SettingsEntryNumber>
 
           <h2 class="font-semibold text-3xl mb-2 mt-10">Audio</h2>
           <SettingsEntrySlider
             label="Hit Volume"
-            min="0"
-            max="1"
-            step="0.1"
-            value="0.1"
+            value={audioSettings.volumeHit}
+            onchange={(val: number) => {
+              userAudioSettings.setKey("volumeHit", val);
+            }}
           ></SettingsEntrySlider>
           <SettingsEntrySlider
             label="Miss Volume"
-            min="0"
-            max="1"
-            step="0.1"
-            value="0.1"
+            value={audioSettings.volumeMiss}
+            onchange={(val: number) => {
+              userAudioSettings.setKey("volumeMiss", val);
+            }}
           ></SettingsEntrySlider>
           <SettingsEntrySlider
             label="Kill Confirm Volume"
-            min="0"
-            max="1"
-            step="0.1"
-            value="0.1"
+            value={audioSettings.volumeKill}
+            onchange={(val: number) => {
+              userAudioSettings.setKey("volumeKill", val);
+            }}
           ></SettingsEntrySlider>
+        </div>
+
+        <div class="flex flex-row items-end w-full">
+          <ul class="ml-auto text-xl flex flex-row gap-5">
+            <KeyboardHint
+              key="ESC"
+              interactable
+              onclick={() => {
+                // TODO: don't do this, this sucks! will need a proper way to close open screens. maybe implement some kind of stack in the main ui.ts
+                this.parent.settingsOpen = false;
+              }}
+            >
+              Back
+            </KeyboardHint>
+          </ul>
         </div>
       </div>
     );

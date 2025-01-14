@@ -10,7 +10,8 @@ import {
 } from "three";
 import { Target } from "./game-objects/target";
 import { AimControls, ClickEventType } from "./aim-controls";
-import { getAspectRatio, getFov } from "./settings";
+import { getFov } from "./settings";
+import { getAspectRatio } from "./utils/aspect-ratio";
 import { LuaHandlers } from "./luaScenario";
 import { MATERIAL_IDS, MATERIALS } from "./asset-loader";
 import { audioHandler } from "src/ts/audio";
