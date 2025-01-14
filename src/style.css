@@ -10,7 +10,7 @@
     font-display: block;
     font-stretch: 75% 100;
     font-weight: 400 700;
-    src: url(/assets/web/fonts/Roboto-Italic-VariableFont_wdth\,wght.ttf)
+    src: url("/assets/web/fonts/Roboto-Italic-VariableFont_wdth,wght.ttf")
       format(opentype) tech(variations);
   }
   @font-face {
@@ -20,7 +20,7 @@
     font-display: block;
     font-stretch: 75% 100;
     font-weight: 400 700;
-    src: url(/assets/web/fonts/Roboto-VariableFont_wdth\,wght.ttf)
+    src: url("/assets/web/fonts/Roboto-VariableFont_wdth,wght.ttf")
       format(opentype) tech(variations);
   }
 
