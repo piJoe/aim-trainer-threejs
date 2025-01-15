@@ -6,7 +6,6 @@ import { renderInstance } from "src/ts/renderer";
 import { setLoadingText } from "src/ts/stores/loading";
 import { PauseMenuScreen } from "src/ts/ui/screens/ingame/pause-menu-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
-import { popScreen, pushScreen } from "src/ts/ui/ui";
 import { sleep } from "src/ts/utils/sleep";
 import { Clock } from "three";
 

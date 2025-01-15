@@ -1,11 +1,12 @@
 import m from "mithril";
 
 export interface UIScreenAttrs {
-  isActiveScreen?: boolean;
   createCb?: () => void;
 }
 
 export abstract class UIScreen implements m.ClassComponent<UIScreenAttrs> {
+  uuid?: string;
+
   oncreate(vnode: m.VnodeDOM<UIScreenAttrs>) {
     if (vnode.attrs.createCb) vnode.attrs.createCb();
   }

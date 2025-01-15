@@ -21,7 +21,9 @@ export const mainUI = {
             { class: "absolute inset-0", key: screen.key },
             m<UIScreenAttrs, UIScreen>(screen.screen, {
               ...screen.attrs,
-              isActiveScreen: idx === screenStack.length - 1,
+              oninit(vnode: m.Vnode<UIScreenAttrs, UIScreen>) {
+                vnode.state.uuid = screen.key;
+              },
             })
           );
         })
@@ -45,6 +47,10 @@ export function pushScreen(screen: { new (): UIScreen }) {
 export function popScreen() {
   screenStack.pop();
   m.redraw();
+}
+
+export function isActiveScreen(screen: UIScreen) {
+  return screenStack.at(-1)?.key === screen.uuid;
 }
 
 // push to screen stack as well, but play transition until newest screen is rendered,

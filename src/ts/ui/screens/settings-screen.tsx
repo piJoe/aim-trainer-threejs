@@ -6,7 +6,7 @@ import {
 import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
 import { PauseMenuScreen } from "src/ts/ui/screens/ingame/pause-menu-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
-import { popScreen } from "src/ts/ui/ui";
+import { isActiveScreen, popScreen } from "src/ts/ui/ui";
 
 interface SettingsEntrySliderAttrs {
   label: string;
@@ -106,6 +106,7 @@ export class SettingsScreen
   }
 
   keyUpEvent(e: KeyboardEvent) {
+    if (!isActiveScreen(this)) return;
     if (e.key === "Escape") {
       popScreen();
     }
