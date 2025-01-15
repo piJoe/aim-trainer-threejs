@@ -64,7 +64,6 @@ export async function screenNavigate(screen: { new (): UIScreen }) {
       attrs: {
         createCb: async () => {
           await transition.finishTransition();
-          m.redraw();
         },
       },
     },

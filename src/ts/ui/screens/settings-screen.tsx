@@ -100,6 +100,8 @@ export class SettingsScreen
   oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
     this.keyUpListener = this.keyUpEvent.bind(this);
     document.addEventListener("keyup", this.keyUpListener);
+
+    super.oncreate(vnode);
   }
   onremove(vnode: m.VnodeDOM<UIScreenAttrs, this>) {
     document.removeEventListener("keyup", this.keyUpListener);
