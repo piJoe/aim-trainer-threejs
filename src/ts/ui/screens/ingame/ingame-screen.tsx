@@ -4,6 +4,8 @@ import { Game } from "src/ts/game";
 import { runLuaScenario } from "src/ts/luaScenario";
 import { renderInstance } from "src/ts/renderer";
 import { setLoadingText } from "src/ts/stores/loading";
+import { FinalScoreScreen } from "src/ts/ui/screens/ingame/final-score-screen";
+import { IngameOverlayScreen } from "src/ts/ui/screens/ingame/ingame-overlay-screen";
 import { PauseMenuScreen } from "src/ts/ui/screens/ingame/pause-menu-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 import { sleep } from "src/ts/utils/sleep";
@@ -13,7 +15,8 @@ export class InGameScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
-  luaStr = "";
+  private luaStr = "";
+  gameInstance?: Game;
 
   async setupScenario() {
     if (!renderInstance.controls || !renderInstance.renderer) {
@@ -22,6 +25,8 @@ export class InGameScreen
 
     setLoadingText("SETUP SCENARIO", "GPT Switching V2");
     const game = new Game(renderInstance.controls);
+    this.gameInstance = game;
+
     const luaCalls = game.getLuaCalls();
     const handlers = await runLuaScenario(luaCalls, this.luaStr);
 
@@ -77,7 +82,9 @@ export class InGameScreen
   }
 
   oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
-    vnode.dom.append(renderInstance.renderer!.domElement);
+    vnode.dom
+      ?.querySelector("#game-canvas")
+      ?.append(renderInstance.renderer!.domElement);
 
     super.oncreate(vnode);
   }
@@ -85,8 +92,12 @@ export class InGameScreen
   view() {
     return (
       <div>
-        {/*TODO: add ingame overlay, visible only when running*/}
-        {!renderInstance.controls?.isLocked && (
+        <div id="game-canvas"></div>
+        {renderInstance.controls?.isLocked ? (
+          <IngameOverlayScreen game={this.gameInstance} />
+        ) : this.gameInstance?.hasEnded ? (
+          <FinalScoreScreen ingameScreen={this} />
+        ) : (
           <PauseMenuScreen ingame={this} />
         )}
       </div>

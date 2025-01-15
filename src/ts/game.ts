@@ -1,3 +1,4 @@
+import m from "mithril";
 import {
   AmbientLight,
   Mesh,
@@ -15,6 +16,15 @@ import { getAspectRatio } from "./utils/aspect-ratio";
 import { LuaHandlers } from "./luaScenario";
 import { MATERIAL_IDS, MATERIALS } from "./asset-loader";
 import { audioHandler } from "src/ts/audio";
+import { map } from "nanostores";
+
+interface GameStore {
+  score: number;
+  avgTTK: number;
+  totalShots: number;
+  shotsHit: number;
+  timeLeft: number;
+}
 
 interface GameConfig {
   roomSize: { x: number; y: number; z: number };
@@ -57,11 +67,18 @@ export class Game {
   private elapsedTime = 0;
   private timer = 0;
 
-  private score = 0;
   private lastKillTimestamp = 0;
   private ttkList: number[] = [];
   private totalShots = 0;
   private shotsHit = 0;
+
+  public gameStore = map<GameStore>({
+    score: 0,
+    avgTTK: 0,
+    totalShots: 0,
+    shotsHit: 0,
+    timeLeft: -1,
+  });
 
   constructor(private controls: AimControls) {
     this.controls.setCamera(this.camera);
@@ -221,11 +238,13 @@ export class Game {
       this.handlers?.handleTargetHit(target.id);
       target.onHit();
       this.shotsHit++;
+      this.gameStore.setKey("shotsHit", this.shotsHit);
       audioHandler.playHit();
     } else {
       audioHandler.playMiss();
     }
     this.totalShots++;
+    this.gameStore.setKey("totalShots", this.totalShots);
   }
 
   updateControlEvents(delta: number) {
@@ -269,39 +288,52 @@ export class Game {
   }
 
   updateTimer(elapsedTime: number) {
+    // if (this.timer <= 0) return;
+    if (this.hasEnded) return;
+
     this.elapsedTime = elapsedTime;
-
-    if (this.timer <= 0) return;
-
     if (this.elapsedTime >= this.timer) {
-      alert(
-        `GAME HAS ENDED! SCORE: ${this.score}\nSee console output for details :)`
+      // alert(
+      //   `GAME HAS ENDED! SCORE: ${this.score}\nSee console output for details :)`
+      // );
+      // console.log("FINAL SCORE:", this.score);
+      // console.log(
+      //   "AVG TTK:",
+      //   (
+      //     this.ttkList.reduce((t, ttk) => (t += ttk), 0) / this.ttkList.length
+      //   ).toFixed(2)
+      // );
+      // console.log(
+      //   "ALL TTK:",
+      //   this.ttkList.map((t) => parseFloat(t.toFixed(2)))
+      // );
+      // console.log(
+      //   "SHOT ACCURACY:",
+      //   ((this.shotsHit / this.totalShots) * 100).toFixed(2),
+      //   `( ${this.shotsHit} / ${this.totalShots} )`
+      // );
+      // this.timer = 0;
+
+      this.gameStore.setKey(
+        "avgTTK",
+        Math.round(
+          (this.ttkList.reduce((t, ttk) => (t += ttk), 0) /
+            this.ttkList.length) *
+            100
+        ) / 100
       );
-      console.log("FINAL SCORE:", this.score);
-      console.log(
-        "AVG TTK:",
-        (
-          this.ttkList.reduce((t, ttk) => (t += ttk), 0) / this.ttkList.length
-        ).toFixed(2)
-      );
-      console.log(
-        "ALL TTK:",
-        this.ttkList.map((t) => parseFloat(t.toFixed(2)))
-      );
-      console.log(
-        "SHOT ACCURACY:",
-        ((this.shotsHit / this.totalShots) * 100).toFixed(2),
-        `( ${this.shotsHit} / ${this.totalShots} )`
-      );
-      this.timer = 0;
+      this.controls.unlock();
+      m.redraw();
     }
 
-    // update timer ui
-    // document.getElementById("game-timer")!.textContent = (
-    //   this.timer - this.elapsedTime
-    // )
-    //   .toFixed(1)
-    //   .padStart((this.timer + "").length + 2, "0");
+    this.gameStore.setKey(
+      "timeLeft",
+      Math.floor(this.timer - this.elapsedTime)
+    );
+  }
+
+  get hasEnded() {
+    return this.timer > 0 && this.elapsedTime >= this.timer;
   }
 
   onTick(elapsedTime: number, delta: number) {
@@ -388,7 +420,7 @@ export class Game {
   }
 
   addScore(add: number) {
-    this.score += add;
+    this.gameStore.setKey("score", this.gameStore.get().score + add);
   }
 
   addTTK() {
