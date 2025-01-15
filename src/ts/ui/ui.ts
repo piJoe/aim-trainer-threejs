@@ -1,64 +1,67 @@
 import m from "mithril";
 import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
-import {
-  UITransition,
-  UITransitionAttrs,
-} from "src/ts/ui/transitions/transition";
+import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
+import { v4 } from "uuid";
 
-let activeScreen: { new (): UIScreen } = LoadingScreen;
-let nextScreens: {
+let screenStack: {
   screen: { new (): UIScreen };
-  transition: { new (): UITransition } | null;
-}[] = [];
+  attrs: UIScreenAttrs;
+  key: string;
+}[] = [{ screen: LoadingScreen, attrs: {}, key: v4() }];
+let transition: TransitionSlideBlack;
 export const mainUI = {
   view: () => {
-    const nextScreen = nextScreens.at(0);
-    if (nextScreen) {
-      if (
-        nextScreen.transition === null ||
-        nextScreen.screen === activeScreen
-      ) {
-        if (nextScreen.screen === activeScreen) {
-          nextScreens.shift();
-        }
-
-        activeScreen = nextScreen.screen;
-        nextScreen.transition = null;
-      }
-    }
-
     return [
-      m<UIScreenAttrs, null>(activeScreen, {
-        createCb: () => {
-          // m.redraw();
+      m.fragment(
+        { key: "screens" },
+        screenStack.map((screen, idx) => {
+          return m(
+            "div",
+            { class: "absolute inset-0", key: screen.key },
+            m<UIScreenAttrs, UIScreen>(screen.screen, {
+              ...screen.attrs,
+              isActiveScreen: idx === screenStack.length - 1,
+            })
+          );
+        })
+      ),
+      m(TransitionSlideBlack, {
+        key: "transition",
+        oncreate(vnode: m.Vnode<{}, TransitionSlideBlack>) {
+          transition = vnode.state;
         },
       }),
-      nextScreen?.transition
-        ? m<UITransitionAttrs, null>(nextScreen.transition, {
-            screenSwapReadyCb: () => {
-              if (nextScreen) {
-                activeScreen = nextScreen.screen;
-              }
-              m.redraw();
-            },
-          })
-        : [],
     ];
   },
 };
 
-export function setActiveScreen(
-  screen: { new (): UIScreen },
-  transition: { new (): UITransition } | null = null
-) {
-  if (nextScreens.at(-1)?.screen === screen) {
-    return;
-  }
+// just add on top of the screen stack
+export function pushScreen(screen: { new (): UIScreen }) {
+  screenStack.push({ screen, attrs: {}, key: v4() });
+  m.redraw();
+}
 
-  nextScreens.push({
-    screen,
-    transition,
-  });
+export function popScreen() {
+  screenStack.pop();
+  m.redraw();
+}
+
+// push to screen stack as well, but play transition until newest screen is rendered,
+// then remove any old screen from stack
+export async function screenNavigate(screen: { new (): UIScreen }) {
+  await transition.triggerTransition();
+  screenStack = [
+    {
+      screen,
+      key: v4(),
+      attrs: {
+        createCb: async () => {
+          await transition.finishTransition();
+          m.redraw();
+        },
+      },
+    },
+  ];
   m.redraw();
 }

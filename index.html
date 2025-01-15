@@ -13,28 +13,9 @@
     <link rel="stylesheet" href="/src/style.css" blocking="render" />
 </head>
 
-<body>
-    <div id="ui" class="absolute inset-0 z-10 overflow-hidden">
-        <div class="h-full bg-purple-flash flex items-center justify-center flex-col gap-5 p-16">
-            <div class="w-[50vw] max-h-[50vh] max-w-[600px] text-primary"></div>
-        </div>
+<body class="overflow-hidden w-screen h-screen">
+    <div class="h-full bg-purple-flash flex items-center justify-center flex-col gap-5 p-16">
     </div>
-
-    <div class="sens-setting hidden">
-        <form target="/" id="sens-setting" onsubmit="return false;">
-            <label for="setting-mouse-cmper360">cmPer360:
-                <input id="setting-mouse-cmper360" name="cmPer360" type="number" value="0" step="0.1">
-            </label>
-            <label for="setting-mouse-dpi">DPI:
-                <input id="setting-mouse-dpi" name="dpi" type="number" value="0">
-            </label>
-            <div>Current Sensitivity: <span id="setting-mouse-sens">0.0</span></div>
-            <button id="save-sensitivity">Save</button>
-            <button id="close-setting">Close</button>
-        </form>
-    </div>
-    <div id="fps-counter">000 FPS</div>
-    <div id="game-timer">60</div>
     <script type="module" src="/src/ts/main.ts"></script>
 </body>
 

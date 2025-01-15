@@ -1,6 +1,7 @@
 import m from "mithril";
 
 export interface UIScreenAttrs {
+  isActiveScreen?: boolean;
   createCb?: () => void;
 }
 

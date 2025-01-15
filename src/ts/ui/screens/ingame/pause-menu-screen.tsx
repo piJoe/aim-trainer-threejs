@@ -5,6 +5,8 @@ import { SettingsScreen } from "src/ts/ui/screens/settings-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
 import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
+import { UIScreen } from "src/ts/ui/screens/ui-screen";
+import { pushScreen } from "src/ts/ui/ui";
 const logoSvg = m.trust(logoStr);
 
 interface MenuEntryAttrs {
@@ -28,9 +30,7 @@ class MenuEntry implements m.ClassComponent<MenuEntryAttrs> {
   }
 }
 
-export class PauseMenuScreen implements m.ClassComponent {
-  public settingsOpen = false;
-
+export class PauseMenuScreen extends UIScreen implements m.ClassComponent {
   view() {
     return (
       <div class="absolute inset-0 flex flex-col backdrop-blur-xl bg-black bg-opacity-50 p-16">
@@ -51,7 +51,7 @@ export class PauseMenuScreen implements m.ClassComponent {
           <MenuEntry
             label="Settings"
             onclick={() => {
-              this.settingsOpen = true;
+              pushScreen(SettingsScreen);
             }}
           />
         </ul>
@@ -67,12 +67,6 @@ export class PauseMenuScreen implements m.ClassComponent {
             <KeyboardHint key="F11">Fullscreen</KeyboardHint>
           </ul>
         </div>
-
-        {this.settingsOpen && (
-          <div class="absolute inset-0">
-            <SettingsScreen parent={this} />
-          </div>
-        )}
       </div>
     );
   }

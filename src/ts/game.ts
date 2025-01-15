@@ -184,9 +184,9 @@ export class Game {
     this.bulletsPerSecond = (this.gameConfig.bulletsPerMinute ?? 0) / 60;
 
     this.timer = this.gameConfig.timer ?? 0;
-    document
-      .getElementById("game-timer")!
-      .classList.toggle("hidden", !(this.gameConfig.timer > 0));
+    // document
+    //   .getElementById("game-timer")!
+    //   .classList.toggle("hidden", !(this.gameConfig.timer > 0));
     this.updateTimer(0);
 
     // TODO: unregister when game scenario done
@@ -297,11 +297,11 @@ export class Game {
     }
 
     // update timer ui
-    document.getElementById("game-timer")!.textContent = (
-      this.timer - this.elapsedTime
-    )
-      .toFixed(1)
-      .padStart((this.timer + "").length + 2, "0");
+    // document.getElementById("game-timer")!.textContent = (
+    //   this.timer - this.elapsedTime
+    // )
+    //   .toFixed(1)
+    //   .padStart((this.timer + "").length + 2, "0");
   }
 
   onTick(elapsedTime: number, delta: number) {
@@ -418,9 +418,9 @@ export class Game {
       this.fpsHistory.reduce((total, i) => (total += i), 0) /
       this.fpsHistory.length;
 
-    document.getElementById("fps-counter")!.innerHTML = `${this.avgFps.toFixed(
-      2
-    )} FPS`;
+    // document.getElementById("fps-counter")!.innerHTML = `${this.avgFps.toFixed(
+    //   2
+    // )} FPS`;
   }
 
   get cameraPosition() {

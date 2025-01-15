@@ -27,22 +27,19 @@ export class AimControls {
   private mouseDown = false;
 
   constructor(private domElement: HTMLElement) {
-    this.domElement.ownerDocument.addEventListener(
+    document.addEventListener(
       "pointerrawupdate",
       this.onPointerRawEvent.bind(this) as EventListener
     );
-    this.domElement.ownerDocument.addEventListener(
+    document.addEventListener(
       "pointerlockchange",
       this.onPointerLockChange.bind(this) as EventListener
     );
-    this.domElement.ownerDocument.addEventListener(
+    document.addEventListener(
       "pointerdown",
       this.onPointerDownEvent.bind(this)
     );
-    this.domElement.ownerDocument.addEventListener(
-      "pointerup",
-      this.onPointerUpEvent.bind(this)
-    );
+    document.addEventListener("pointerup", this.onPointerUpEvent.bind(this));
 
     userMouseSettingsSensC.subscribe((sens) => {
       this.mouseSensitivity = sens;
@@ -125,6 +122,6 @@ export class AimControls {
   }
 
   unlock() {
-    this.domElement.ownerDocument.exitPointerLock();
+    document.exitPointerLock();
   }
 }

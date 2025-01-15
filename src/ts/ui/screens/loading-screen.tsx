@@ -4,9 +4,8 @@ import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
 import { loadingState } from "src/ts/stores/loading";
-import { setActiveScreen } from "src/ts/ui/ui";
+import { screenNavigate } from "src/ts/ui/ui";
 import { InGameScreen } from "src/ts/ui/screens/ingame/ingame-screen";
-import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
 import { audioHandler } from "src/ts/audio";
 const logoSvg = m.trust(logoStr);
 
@@ -38,7 +37,7 @@ export class LoadingScreen
         onclick={() => {
           if (!paused) return;
           audioHandler.setup();
-          setActiveScreen(InGameScreen, TransitionSlideBlack);
+          screenNavigate(InGameScreen);
         }}
       >
         <div class="w-[50vw] max-h-[50vh] max-w-[600px] text-primary">

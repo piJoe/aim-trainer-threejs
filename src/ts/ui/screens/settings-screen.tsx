@@ -6,6 +6,7 @@ import {
 import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
 import { PauseMenuScreen } from "src/ts/ui/screens/ingame/pause-menu-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
+import { popScreen } from "src/ts/ui/ui";
 
 interface SettingsEntrySliderAttrs {
   label: string;
@@ -27,7 +28,7 @@ class SettingsEntrySlider
           </span>
           <div class="w-full relative flex flex-row items-center">
             <input
-              class="w-full appearance-none h-5 opacity-0"
+              class="w-full appearance-none h-5 opacity-0 cursor-pointer"
               type="range"
               min={0}
               max={1}
@@ -94,12 +95,7 @@ export class SettingsScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
-  private parent!: PauseMenuScreen;
   private keyUpListener!: any;
-
-  oninit(vnode: m.Vnode<UIScreenAttrs, this>) {
-    this.parent = (vnode.attrs as any).parent as PauseMenuScreen;
-  }
 
   oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
     this.keyUpListener = this.keyUpEvent.bind(this);
@@ -111,9 +107,7 @@ export class SettingsScreen
 
   keyUpEvent(e: KeyboardEvent) {
     if (e.key === "Escape") {
-      // TODO: don't do this, this sucks! will need a proper way to close open screens. maybe implement some kind of stack in the main ui.ts
-      this.parent.settingsOpen = false;
-      m.redraw();
+      popScreen();
     }
   }
 
@@ -173,8 +167,7 @@ export class SettingsScreen
               key="ESC"
               interactable
               onclick={() => {
-                // TODO: don't do this, this sucks! will need a proper way to close open screens. maybe implement some kind of stack in the main ui.ts
-                this.parent.settingsOpen = false;
+                popScreen();
               }}
             >
               Back
