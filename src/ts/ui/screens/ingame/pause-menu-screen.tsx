@@ -5,8 +5,8 @@ import { SettingsScreen } from "src/ts/ui/screens/settings-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
 import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
-import { UIScreen } from "src/ts/ui/screens/ui-screen";
 import { pushScreen } from "src/ts/ui/ui";
+import { InGameScreen } from "src/ts/ui/screens/ingame/ingame-screen";
 const logoSvg = m.trust(logoStr);
 
 interface MenuEntryAttrs {
@@ -30,8 +30,11 @@ class MenuEntry implements m.ClassComponent<MenuEntryAttrs> {
   }
 }
 
-export class PauseMenuScreen extends UIScreen implements m.ClassComponent {
-  view() {
+export interface PauseMenuScreenAttrs {
+  ingame?: InGameScreen;
+}
+export class PauseMenuScreen implements m.ClassComponent<PauseMenuScreenAttrs> {
+  view(vnode: m.Vnode<PauseMenuScreenAttrs>) {
     return (
       <div class="absolute inset-0 flex flex-col backdrop-blur-xl bg-black bg-opacity-50 p-16">
         <div class="w-[120px] text-primary">{logoSvg}</div>
@@ -44,8 +47,9 @@ export class PauseMenuScreen extends UIScreen implements m.ClassComponent {
           />
           <MenuEntry
             label="Restart"
-            onclick={() => {
-              // TODO: somehow retrigger the oninit method in the ingame-screen.tsx, maybe by event?
+            onclick={async () => {
+              await vnode.attrs.ingame?.setupScenario();
+              renderInstance.controls?.lock();
             }}
           />
           <MenuEntry

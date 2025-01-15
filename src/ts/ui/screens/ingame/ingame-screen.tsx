@@ -13,69 +13,67 @@ export class InGameScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
-  async oninit(vnode: m.Vnode<UIScreenAttrs, this>) {
-    setLoadingText("LOADING SCENARIO", "GPT Switching V2");
+  luaStr = "";
 
-    const luaStr = await (
-      await fetch("/scenarios/v2/gpt-switching.lua")
-    ).text();
+  async setupScenario() {
+    if (!renderInstance.controls || !renderInstance.renderer) {
+      return;
+    }
 
-    async function setupScenario() {
-      if (!renderInstance.controls || !renderInstance.renderer) {
+    setLoadingText("SETUP SCENARIO", "GPT Switching V2");
+    const game = new Game(renderInstance.controls);
+    const luaCalls = game.getLuaCalls();
+    const handlers = await runLuaScenario(luaCalls, this.luaStr);
+
+    const { scene, camera } = await game.setup(handlers);
+    scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
+
+    const clock = new Clock();
+    // TODO: decouple physics tick from rendering, use interpolation
+    // let physicsTickAccumulator = 0;
+    // const physicsTickRate = 1 / 60;
+    let firstFrame = true;
+    let elapsedTime = 0;
+    function render() {
+      // const elapsedTime = clock.elapsedTime;
+      const delta = clock.getDelta();
+      if (!renderInstance.controls!.isLocked && !firstFrame) {
         return;
       }
 
-      setLoadingText("SETUP SCENARIO", "GPT Switching V2");
-      const game = new Game(renderInstance.controls);
-      const luaCalls = game.getLuaCalls();
-      const handlers = await runLuaScenario(luaCalls, luaStr);
+      // need this manually because clock keeps running when game is paused :(
+      elapsedTime += delta;
 
-      const { scene, camera } = await game.setup(handlers);
-      scene.environment = TEXTURES.get(TEXTURE_IDS.ENV_AUTOSHOP)!;
+      game.onTick(elapsedTime, delta);
 
-      const clock = new Clock();
       // TODO: decouple physics tick from rendering, use interpolation
-      // let physicsTickAccumulator = 0;
-      // const physicsTickRate = 1 / 60;
-      let firstFrame = true;
-      let elapsedTime = 0;
-      function render() {
-        // const elapsedTime = clock.elapsedTime;
-        const delta = clock.getDelta();
-        if (!renderInstance.controls!.isLocked && !firstFrame) {
-          return;
-        }
+      // physicsTickAccumulator += delta;
+      // while (physicsTickAccumulator > physicsTickRate) {
+      //   physicsTickAccumulator -= physicsTickRate;
+      //   game.onTick(elapsedTime, physicsTickRate);
+      // }
+      // game.render(delta, physicsTickRate);
 
-        // need this manually because clock keeps running when game is paused :(
-        elapsedTime += delta;
+      renderInstance.renderer!.clear();
+      renderInstance.renderer!.render(scene, camera);
+      renderInstance.renderer!.clearDepth();
+      renderInstance.renderer!.render(
+        renderInstance.overlayScene!,
+        renderInstance.overlayCamera!
+      );
 
-        game.onTick(elapsedTime, delta);
-
-        // TODO: decouple physics tick from rendering, use interpolation
-        // physicsTickAccumulator += delta;
-        // while (physicsTickAccumulator > physicsTickRate) {
-        //   physicsTickAccumulator -= physicsTickRate;
-        //   game.onTick(elapsedTime, physicsTickRate);
-        // }
-        // game.render(delta, physicsTickRate);
-
-        renderInstance.renderer!.clear();
-        renderInstance.renderer!.render(scene, camera);
-        renderInstance.renderer!.clearDepth();
-        renderInstance.renderer!.render(
-          renderInstance.overlayScene!,
-          renderInstance.overlayCamera!
-        );
-
-        firstFrame = false;
-      }
-      scene.updateMatrixWorld();
-      renderInstance.renderer.setAnimationLoop(render);
-
-      await sleep(1000);
+      firstFrame = false;
     }
+    scene.updateMatrixWorld();
+    renderInstance.renderer.setAnimationLoop(render);
 
-    await setupScenario();
+    await sleep(500);
+  }
+  async oninit(vnode: m.Vnode<UIScreenAttrs, this>) {
+    setLoadingText("LOADING SCENARIO", "GPT Switching V2");
+
+    this.luaStr = await (await fetch("/scenarios/v2/gpt-switching.lua")).text();
+    await this.setupScenario();
   }
 
   oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
@@ -88,7 +86,9 @@ export class InGameScreen
     return (
       <div>
         {/*TODO: add ingame overlay, visible only when running*/}
-        {!renderInstance.controls?.isLocked && <PauseMenuScreen />}
+        {!renderInstance.controls?.isLocked && (
+          <PauseMenuScreen ingame={this} />
+        )}
       </div>
     );
   }
