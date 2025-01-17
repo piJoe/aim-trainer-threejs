@@ -22,9 +22,13 @@ export class FinalScoreScreen
 
   keyUpEvent(e: KeyboardEvent) {
     if (e.key === "Escape") {
-      this.ingameScreen?.setupScenario();
-      m.redraw();
+      this.restartAndBackToMenu();
     }
+  }
+
+  restartAndBackToMenu() {
+    this.ingameScreen?.setupScenario();
+    m.redraw();
   }
 
   view(vnode: m.Vnode<FinalScoreScreenAttrs>) {
@@ -68,8 +72,7 @@ export class FinalScoreScreen
               key="ESC"
               interactable
               onclick={() => {
-                this.ingameScreen?.setupScenario();
-                m.redraw();
+                this.restartAndBackToMenu();
               }}
             >
               BACK
