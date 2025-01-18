@@ -4,6 +4,7 @@ import {
   Mesh,
   PerspectiveCamera,
   PlaneGeometry,
+  Quaternion,
   Raycaster,
   Scene,
   Vector2,
@@ -31,6 +32,24 @@ interface GameConfig {
   cameraPos: { x: number; y: number; z: number };
   bulletsPerMinute?: number;
   timer: number;
+}
+
+enum ReplayEventEnum {
+  SETROOMSIZE = "setroomsize",
+  SETCAMERAPOSITION = "setcameraposition",
+  SETWEAPONRPM = "setweaponrpm",
+  SETTIMER = "settimer",
+  CREATETARGET = "createtarget",
+  SETUPTARGET = "setuptarget",
+  UPDATETARGET = "updatetarget",
+  REMOVETARGET = "removetarget",
+  UPDATECAMERA = "updatecamera",
+  PERFORMSHOT = "performshot",
+}
+export interface ReplayEvent {
+  elapsedTime: number;
+  event: ReplayEventEnum;
+  data?: any;
 }
 
 export class Game {
@@ -80,6 +99,9 @@ export class Game {
     timeLeft: -1,
   });
 
+  private replayLastCamEvent = 0;
+  private replayEvents: ReplayEvent[] = [];
+
   constructor(private controls: AimControls) {
     this.controls.setCamera(this.camera);
   }
@@ -100,20 +122,44 @@ export class Game {
     this.gameConfig.roomSize.x = width;
     this.gameConfig.roomSize.y = height;
     this.gameConfig.roomSize.z = length;
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.SETROOMSIZE,
+      data: { width, length, height },
+    });
   }
 
   setCameraPosition(x: number, y: number, z: number) {
     this.gameConfig.cameraPos.x = x;
     this.gameConfig.cameraPos.y = y;
     this.gameConfig.cameraPos.z = z;
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.SETCAMERAPOSITION,
+      data: { x, y, z },
+    });
   }
 
   setWeaponRPM(rpm: number) {
     this.gameConfig.bulletsPerMinute = rpm;
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.SETWEAPONRPM,
+      data: { rpm },
+    });
   }
 
   setTimer(seconds: number) {
     this.gameConfig.timer = seconds;
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.SETTIMER,
+      data: { seconds },
+    });
   }
 
   async setup(handlers: LuaHandlers) {
@@ -245,6 +291,19 @@ export class Game {
     }
     this.totalShots++;
     this.gameStore.setKey("totalShots", this.totalShots);
+
+    // this.replayEvents.push({
+    //   elapsedTime: this.elapsedTime,
+    //   event: ReplayEventEnum.UPDATECAMERA,
+    //   data: {
+    //     position: this.raycastCam.position.clone(),
+    //     quaternion: this.raycastCam.quaternion.clone(),
+    //   },
+    // });
+    // this.replayEvents.push({
+    //   elapsedTime: this.elapsedTime,
+    //   event: ReplayEventEnum.PERFORMSHOT,
+    // });
   }
 
   updateControlEvents(delta: number) {
@@ -323,6 +382,9 @@ export class Game {
         ) / 100
       );
       this.controls.unlock();
+
+      const replayJson = JSON.stringify(this.replayEvents);
+      console.log(replayJson);
       m.redraw();
     }
 
@@ -338,9 +400,22 @@ export class Game {
 
   onTick(elapsedTime: number, delta: number) {
     this.updateAverageFps(delta);
-
     this.updateTimer(elapsedTime);
+
     this.updateControlEvents(delta);
+
+    // only record camera events at 60 fps
+    if (this.replayLastCamEvent < this.elapsedTime - 1 / 60) {
+      this.replayLastCamEvent = this.elapsedTime;
+      this.replayEvents.push({
+        elapsedTime: this.elapsedTime,
+        event: ReplayEventEnum.UPDATECAMERA,
+        data: {
+          position: this.camera.position.clone(),
+          quaternion: this.camera.quaternion.clone(),
+        },
+      });
+    }
 
     // first: handle every target inside lua
     this.handlers?.handleTick(elapsedTime, delta);
@@ -363,6 +438,20 @@ export class Game {
     this.targetsToAdd = [];
   }
 
+  replayTick() {
+    this.targetsToRemove.forEach((target) => {
+      this.targets.delete(target.id);
+      target.removeObjectFromParent(this.scene);
+    });
+    this.targetsToRemove = [];
+
+    for (const target of this.targetsToAdd) {
+      target.addObjectToParent(this.scene);
+      this.targets.set(target.id, target);
+    }
+    this.targetsToAdd = [];
+  }
+
   // TODO: decouple physics tick from rendering, use interpolation
   // render(delta: number, physicsTickRate: number) {
   //   for (const target of this.targets.values()) {
@@ -370,9 +459,16 @@ export class Game {
   //   }
   // }
 
-  createTarget(): number {
-    const target = new Target(this);
+  createTarget(forceId?: number): number {
+    const target = new Target(this, forceId);
     this.addTarget(target);
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.CREATETARGET,
+      data: { id: target.id },
+    });
+
     return target.id;
   }
 
@@ -392,7 +488,21 @@ export class Game {
       return;
     }
 
-    target.setup(radius, height, new Vector3(posX, posY, posZ), maxHp, hp);
+    const position = new Vector3(posX, posY, posZ);
+    target.setup(radius, height, position, maxHp, hp);
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.SETUPTARGET,
+      data: {
+        id: target.id,
+        radius,
+        height,
+        position: position.clone(),
+        maxHp,
+        hp,
+      },
+    });
   }
 
   updateTarget(
@@ -408,7 +518,14 @@ export class Game {
       return;
     }
 
-    target.update(new Vector3(posX, posY, posZ), hp);
+    const position = new Vector3(posX, posY, posZ);
+    target.update(position, hp);
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.UPDATETARGET,
+      data: { id: targetId, position: position.clone(), hp },
+    });
   }
 
   addTarget(target: Target) {
@@ -417,6 +534,12 @@ export class Game {
 
   removeTarget(target: Target) {
     this.targetsToRemove.push(target);
+
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: ReplayEventEnum.REMOVETARGET,
+      data: { id: target.id },
+    });
   }
 
   addScore(add: number) {
@@ -453,6 +576,68 @@ export class Game {
     // document.getElementById("fps-counter")!.innerHTML = `${this.avgFps.toFixed(
     //   2
     // )} FPS`;
+  }
+
+  performReplayEvent(event: ReplayEvent) {
+    switch (event.event) {
+      case ReplayEventEnum.SETROOMSIZE:
+        this.setRoomSize(
+          event.data.width,
+          event.data.length,
+          event.data.height
+        );
+        break;
+      case ReplayEventEnum.SETCAMERAPOSITION:
+        this.setCameraPosition(event.data.x, event.data.y, event.data.z);
+        break;
+      case ReplayEventEnum.SETWEAPONRPM:
+        this.setWeaponRPM(event.data.rpm);
+        break;
+      case ReplayEventEnum.SETTIMER:
+        this.setTimer(event.data.seconds);
+        break;
+      case ReplayEventEnum.CREATETARGET:
+        this.createTarget(event.data.id);
+        break;
+      case ReplayEventEnum.SETUPTARGET:
+        this.setupTarget(
+          event.data.id,
+          event.data.radius,
+          event.data.height,
+          event.data.position.x,
+          event.data.position.y,
+          event.data.position.z,
+          event.data.maxHp,
+          event.data.hp
+        );
+        break;
+      case ReplayEventEnum.UPDATETARGET:
+        this.updateTarget(
+          event.data.id,
+          event.data.position.x,
+          event.data.position.y,
+          event.data.position.z,
+          event.data.hp
+        );
+        break;
+      case ReplayEventEnum.REMOVETARGET:
+        const target = this.findTargetById(event.data.id);
+        if (target) this.removeTarget(target);
+        break;
+      case ReplayEventEnum.UPDATECAMERA:
+        this.camera.position.copy(event.data.position);
+        this.camera.quaternion.copy(
+          new Quaternion().fromArray(event.data.quaternion)
+        );
+        this.raycastCam.copy(this.camera);
+        this.camera.updateMatrixWorld(true);
+        this.raycastCam.updateMatrixWorld(true);
+        this.raycaster.setFromCamera(this.raycasterVector, this.raycastCam);
+        break;
+      case ReplayEventEnum.PERFORMSHOT:
+        // bang!
+        break;
+    }
   }
 
   get cameraPosition() {
