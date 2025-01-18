@@ -1,5 +1,5 @@
 --[[@SCENARIO
-Title: GPT Swichting V2
+Title: GPT Switching V2
 Type: Switching
 Author: Admin (and GPT)
 Description: A scenario with predefined movement patterns for training target switching.

@@ -95,21 +95,21 @@ export class SettingsScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
-  private keyUpListener!: any;
+  private keyDownListener!: any;
 
   oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
-    this.keyUpListener = this.keyUpEvent.bind(this);
-    document.addEventListener("keyup", this.keyUpListener);
+    this.keyDownListener = this.keyDownEvent.bind(this);
+    document.addEventListener("keydown", this.keyDownListener);
 
     super.oncreate(vnode);
   }
   onremove(vnode: m.VnodeDOM<UIScreenAttrs, this>) {
-    document.removeEventListener("keyup", this.keyUpListener);
+    document.removeEventListener("keydown", this.keyDownListener);
   }
 
-  keyUpEvent(e: KeyboardEvent) {
+  keyDownEvent(e: KeyboardEvent) {
     if (!isActiveScreen(this)) return;
-    if (e.key === "Escape") {
+    if (!e.repeat && e.key === "Escape") {
       popScreen();
     }
   }

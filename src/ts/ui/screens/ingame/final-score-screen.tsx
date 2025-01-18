@@ -9,19 +9,19 @@ export class FinalScoreScreen
   implements m.ClassComponent<FinalScoreScreenAttrs>
 {
   private ingameScreen?: InGameScreen;
-  private keyUpListener!: any;
+  private keyDownListener!: any;
 
   oncreate(vnode: m.Vnode<FinalScoreScreenAttrs>) {
     this.ingameScreen = vnode.attrs.ingameScreen;
-    this.keyUpListener = this.keyUpEvent.bind(this);
-    document.addEventListener("keyup", this.keyUpListener);
+    this.keyDownListener = this.keyDownEvent.bind(this);
+    document.addEventListener("keydown", this.keyDownListener);
   }
   onremove() {
-    document.removeEventListener("keyup", this.keyUpListener);
+    document.removeEventListener("keydown", this.keyDownListener);
   }
 
-  keyUpEvent(e: KeyboardEvent) {
-    if (e.key === "Escape") {
+  keyDownEvent(e: KeyboardEvent) {
+    if (!e.repeat && e.key === "Escape") {
       this.restartAndBackToMenu();
     }
   }
