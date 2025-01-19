@@ -1,4 +1,5 @@
 import m from "mithril";
+import { LoadingIndicator } from "src/ts/ui/components/loading-indicator";
 import { LoadingScreen } from "src/ts/ui/screens/loading-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 import { TransitionSlideBlack } from "src/ts/ui/transitions/transition-slide";
@@ -34,6 +35,7 @@ export const mainUI = {
           transition = vnode.state;
         },
       }),
+      m(LoadingIndicator, { key: "loading_indicator" }),
     ];
   },
 };
@@ -55,13 +57,17 @@ export function isActiveScreen(screen: UIScreen) {
 
 // push to screen stack as well, but play transition until newest screen is rendered,
 // then remove any old screen from stack
-export async function screenNavigate(screen: { new (): UIScreen }) {
+export async function screenNavigate<
+  S extends UIScreen,
+  A extends UIScreenAttrs
+>(screen: { new (): S }, attrs?: A) {
   await transition.triggerTransition();
   screenStack = [
     {
       screen,
       key: v4(),
       attrs: {
+        ...attrs,
         createCb: async () => {
           await transition.finishTransition();
         },

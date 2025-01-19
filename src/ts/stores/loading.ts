@@ -20,6 +20,14 @@ export function setLoadingText(title: string, desc?: string) {
   });
 }
 
+export function setLoadingNoText() {
+  loadingState.set({
+    title: "",
+    description: "",
+    paused: false,
+  });
+}
+
 export function setLoadingPaused(paused: boolean) {
   loadingState.setKey("paused", paused);
 }

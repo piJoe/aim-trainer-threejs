@@ -1,12 +1,12 @@
 import m from "mithril";
 import { LoadingIndicator } from "src/ts/ui/components/loading-indicator";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
-
-import logoStr from "assets/web/logo.svg?raw";
 import { loadingState } from "src/ts/stores/loading";
 import { screenNavigate } from "src/ts/ui/ui";
-import { InGameScreen } from "src/ts/ui/screens/ingame/ingame-screen";
 import { audioHandler } from "src/ts/audio";
+
+import logoStr from "assets/web/logo.svg?raw";
+import { ChooseScreen } from "src/ts/ui/screens/choose-screen";
 const logoSvg = m.trust(logoStr);
 
 export class LoadingScreen
@@ -37,7 +37,7 @@ export class LoadingScreen
         onclick={() => {
           if (!paused) return;
           audioHandler.setup();
-          screenNavigate(InGameScreen);
+          screenNavigate(ChooseScreen);
         }}
       >
         <div class="w-[50vw] max-h-[50vh] max-w-[600px] text-primary">
@@ -51,7 +51,6 @@ export class LoadingScreen
         >
           Click to start
         </div>
-        <LoadingIndicator></LoadingIndicator>
       </div>
     );
   }

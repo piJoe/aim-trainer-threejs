@@ -3,18 +3,23 @@ import { TEXTURE_IDS, TEXTURES } from "src/ts/asset-loader";
 import { Game } from "src/ts/game";
 import { runLuaScenario } from "src/ts/luaScenario";
 import { renderInstance } from "src/ts/renderer";
-import { setLoadingText } from "src/ts/stores/loading";
+import { setLoadingNoText, setLoadingPaused } from "src/ts/stores/loading";
 import { FinalScoreScreen } from "src/ts/ui/screens/ingame/final-score-screen";
 import { IngameOverlayScreen } from "src/ts/ui/screens/ingame/ingame-overlay-screen";
 import { PauseMenuScreen } from "src/ts/ui/screens/ingame/pause-menu-screen";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
-import { sleep } from "src/ts/utils/sleep";
 import { Clock } from "three";
 
+export interface InGameScreenAttrs extends UIScreenAttrs {
+  scenarioUrl?: string;
+  scenarioTitle?: string;
+}
 export class InGameScreen
   extends UIScreen
-  implements m.ClassComponent<UIScreenAttrs>
+  implements m.ClassComponent<InGameScreenAttrs>
 {
+  scenarioTitle?: string;
+
   private luaStr = "";
   gameInstance?: Game;
 
@@ -23,7 +28,7 @@ export class InGameScreen
       return;
     }
 
-    setLoadingText("SETUP SCENARIO", "GPT Switching V2");
+    setLoadingNoText();
     const game = new Game(renderInstance.controls);
     this.gameInstance = game;
 
@@ -72,16 +77,24 @@ export class InGameScreen
     scene.updateMatrixWorld();
     renderInstance.renderer.setAnimationLoop(render);
 
-    await sleep(500);
+    setLoadingPaused(true);
   }
-  async oninit(vnode: m.Vnode<UIScreenAttrs, this>) {
-    setLoadingText("LOADING SCENARIO", "GPT Switching V2");
+  async oninit(vnode: m.Vnode<InGameScreenAttrs, this>) {
+    this.scenarioTitle = vnode.attrs.scenarioTitle;
 
-    this.luaStr = await (await fetch("/scenarios/v2/gpt-switching.lua")).text();
+    setLoadingNoText();
+  }
+
+  async oncreate(vnode: m.VnodeDOM<InGameScreenAttrs, this>): Promise<void> {
+    if (!vnode.attrs.scenarioUrl) {
+      return;
+    }
+
+    setLoadingNoText();
+    this.luaStr = await (await fetch(vnode.attrs.scenarioUrl)).text();
     await this.setupScenario();
-  }
+    setLoadingPaused(true);
 
-  oncreate(vnode: m.VnodeDOM<UIScreenAttrs>): void {
     vnode.dom
       ?.querySelector("#game-canvas")
       ?.append(renderInstance.renderer!.domElement);
@@ -94,7 +107,7 @@ export class InGameScreen
       <div>
         <div id="game-canvas"></div>
         {renderInstance.controls?.isLocked ? (
-          <IngameOverlayScreen game={this.gameInstance} />
+          <IngameOverlayScreen ingameScreen={this} />
         ) : this.gameInstance?.hasEnded ? (
           <FinalScoreScreen ingameScreen={this} />
         ) : (

@@ -462,4 +462,8 @@ export class Game {
   get averageFps() {
     return this.avgFps;
   }
+
+  get hasStarted() {
+    return this.elapsedTime > 0;
+  }
 }

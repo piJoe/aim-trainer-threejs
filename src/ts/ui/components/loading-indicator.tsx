@@ -22,7 +22,7 @@ export class LoadingIndicator implements m.ClassComponent {
     return (
       <div
         class={[
-          "absolute right-16 bottom-16 flex flex-row self-end items-center gap-5 text-white",
+          "absolute z-50 right-16 bottom-16 flex flex-row self-end items-center gap-5 text-white",
           loading.paused && "hidden",
         ].join(" ")}
       >

@@ -7,7 +7,7 @@ export interface UIScreenAttrs {
 export abstract class UIScreen implements m.ClassComponent<UIScreenAttrs> {
   uuid?: string;
 
-  oncreate(vnode: m.VnodeDOM<UIScreenAttrs>) {
+  oncreate(vnode: m.VnodeDOM<UIScreenAttrs, this>) {
     if (vnode.attrs.createCb) vnode.attrs.createCb();
   }
 
