@@ -1,5 +1,4 @@
 import m from "mithril";
-import { LoadingIndicator } from "src/ts/ui/components/loading-indicator";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 import { loadingState } from "src/ts/stores/loading";
 import { screenNavigate } from "src/ts/ui/ui";

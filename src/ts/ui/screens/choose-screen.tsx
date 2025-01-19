@@ -10,9 +10,6 @@ import {
 import thumbnailClickingUrl from "assets/web/thumbnails/clicking.svg?url";
 import thumbnailTrackginUrl from "assets/web/thumbnails/tracking.svg?url";
 import thumbnailSwitchingUrl from "assets/web/thumbnails/switching.svg?url";
-// const thumbClickingSvg = m.trust(thumbnailClickingStr);
-// const thumbTrackingSvg = m.trust(thumbnailTrackginStr);
-// const thumbSwichtingSvg = m.trust(thumbnailSwitchingStr);
 
 enum ScenarioType {
   CLICKING = "clicking",
