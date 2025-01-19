@@ -292,28 +292,8 @@ export class Game {
     if (this.hasEnded) return;
 
     this.elapsedTime = elapsedTime;
+    // game is done, unlock controls -> activate the final score screen
     if (this.elapsedTime >= this.timer) {
-      // alert(
-      //   `GAME HAS ENDED! SCORE: ${this.score}\nSee console output for details :)`
-      // );
-      // console.log("FINAL SCORE:", this.score);
-      // console.log(
-      //   "AVG TTK:",
-      //   (
-      //     this.ttkList.reduce((t, ttk) => (t += ttk), 0) / this.ttkList.length
-      //   ).toFixed(2)
-      // );
-      // console.log(
-      //   "ALL TTK:",
-      //   this.ttkList.map((t) => parseFloat(t.toFixed(2)))
-      // );
-      // console.log(
-      //   "SHOT ACCURACY:",
-      //   ((this.shotsHit / this.totalShots) * 100).toFixed(2),
-      //   `( ${this.shotsHit} / ${this.totalShots} )`
-      // );
-      // this.timer = 0;
-
       this.gameStore.setKey(
         "avgTTK",
         Math.round(
