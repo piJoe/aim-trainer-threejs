@@ -1,18 +1,18 @@
 import m from "mithril";
 import { UIScreen, UIScreenAttrs } from "src/ts/ui/screens/ui-screen";
 import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
-
-import thumbnailClickingStr from "assets/web/thumbnails/clicking.svg?raw";
-import thumbnailTrackginStr from "assets/web/thumbnails/tracking.svg?raw";
-import thumbnailSwitchingStr from "assets/web/thumbnails/switching.svg?raw";
 import { screenNavigate } from "src/ts/ui/ui";
 import {
   InGameScreen,
   InGameScreenAttrs,
 } from "src/ts/ui/screens/ingame/ingame-screen";
-const thumbClickingSvg = m.trust(thumbnailClickingStr);
-const thumbTrackingSvg = m.trust(thumbnailTrackginStr);
-const thumbSwichtingSvg = m.trust(thumbnailSwitchingStr);
+
+import thumbnailClickingUrl from "assets/web/thumbnails/clicking.svg?url";
+import thumbnailTrackginUrl from "assets/web/thumbnails/tracking.svg?url";
+import thumbnailSwitchingUrl from "assets/web/thumbnails/switching.svg?url";
+// const thumbClickingSvg = m.trust(thumbnailClickingStr);
+// const thumbTrackingSvg = m.trust(thumbnailTrackginStr);
+// const thumbSwichtingSvg = m.trust(thumbnailSwitchingStr);
 
 enum ScenarioType {
   CLICKING = "clicking",
@@ -53,15 +53,15 @@ class PlaceholderThumbnail
   implements m.ClassComponent<PlaceholderThumbnailAttrs>
 {
   view(vnode: m.Vnode<PlaceholderThumbnailAttrs, this>): m.Children {
-    const svg =
+    const url =
       vnode.attrs.type === ScenarioType.CLICKING
-        ? thumbClickingSvg
+        ? thumbnailClickingUrl
         : vnode.attrs.type === ScenarioType.SWITCHING
-        ? thumbSwichtingSvg
+        ? thumbnailSwitchingUrl
         : vnode.attrs.type === ScenarioType.TRACKING
-        ? thumbTrackingSvg
+        ? thumbnailTrackginUrl
         : "";
-    return svg;
+    return <img src={url} class="w-full" />;
   }
 }
 
