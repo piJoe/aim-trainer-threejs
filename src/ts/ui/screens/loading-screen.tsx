@@ -13,12 +13,18 @@ export class LoadingScreen
   extends UIScreen
   implements m.ClassComponent<UIScreenAttrs>
 {
+  unsupported = false;
   cancelLoadingStateListen?: () => void;
 
   oninit(vnode: m.Vnode) {
     this.cancelLoadingStateListen = loadingState.listen(() => {
       m.redraw();
     });
+
+    // @ts-ignore
+    if (document.onpointerrawupdate !== null) {
+      this.unsupported = true;
+    }
   }
 
   onremove(vnode: m.VnodeDOM) {
@@ -51,6 +57,15 @@ export class LoadingScreen
         >
           Click to start
         </div>
+        {this.unsupported && (
+          <div class="bg-scenario-clicking p-4 rounded-md text-white text-lg/6 font-medium">
+            <span>
+              THIS GAME IS PROBABLY NOT COMPATIBLE WITH YOUR BROWSER.
+              <br />
+              PLEASE TRY RUNNING IT IN CHROME OR A CHROMIUM-BASED BROWSER.
+            </span>
+          </div>
+        )}
       </div>
     );
   }
