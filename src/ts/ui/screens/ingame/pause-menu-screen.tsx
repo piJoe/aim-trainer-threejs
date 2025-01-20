@@ -5,7 +5,7 @@ import { SettingsScreen } from "src/ts/ui/screens/settings-screen";
 
 import logoStr from "assets/web/logo.svg?raw";
 import { KeyboardHint } from "src/ts/ui/components/keyboard-hint";
-import { pushScreen, screenNavigate } from "src/ts/ui/ui";
+import { isActiveScreen, pushScreen, screenNavigate } from "src/ts/ui/ui";
 import { InGameScreen } from "src/ts/ui/screens/ingame/ingame-screen";
 import { ChooseScreen } from "src/ts/ui/screens/choose-screen";
 const logoSvg = m.trust(logoStr);
@@ -36,6 +36,11 @@ export interface PauseMenuScreenAttrs {
 }
 export class PauseMenuScreen implements m.ClassComponent<PauseMenuScreenAttrs> {
   private keyDownListener!: any;
+  private ingameScreen?: InGameScreen;
+
+  oninit(vnode: m.Vnode<PauseMenuScreenAttrs, this>) {
+    this.ingameScreen = vnode.attrs.ingame;
+  }
 
   oncreate(vnode: m.Vnode<PauseMenuScreenAttrs>) {
     this.keyDownListener = this.keyDownEvent.bind(this);
@@ -47,6 +52,7 @@ export class PauseMenuScreen implements m.ClassComponent<PauseMenuScreenAttrs> {
   }
 
   keyDownEvent(e: KeyboardEvent) {
+    if (this.ingameScreen && !isActiveScreen(this.ingameScreen)) return;
     if (!e.repeat && e.key === "Escape") {
       this.backToChoose();
     }
