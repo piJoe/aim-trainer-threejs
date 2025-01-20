@@ -34,22 +34,75 @@ interface GameConfig {
   timer: number;
 }
 
+// enum ReplayEventEnum {
+//   SETROOMSIZE = "setroomsize",
+//   SETCAMERAPOSITION = "setcameraposition",
+//   SETWEAPONRPM = "setweaponrpm",
+//   SETTIMER = "settimer",
+//   CREATETARGET = "createtarget",
+//   SETUPTARGET = "setuptarget",
+//   UPDATETARGET = "updatetarget",
+//   REMOVETARGET = "removetarget",
+//   UPDATECAMERA = "updatecamera",
+//   PERFORMSHOT = "performshot",
+// }
 enum ReplayEventEnum {
-  SETROOMSIZE = "setroomsize",
-  SETCAMERAPOSITION = "setcameraposition",
-  SETWEAPONRPM = "setweaponrpm",
-  SETTIMER = "settimer",
-  CREATETARGET = "createtarget",
-  SETUPTARGET = "setuptarget",
-  UPDATETARGET = "updatetarget",
-  REMOVETARGET = "removetarget",
-  UPDATECAMERA = "updatecamera",
-  PERFORMSHOT = "performshot",
+  SETROOMSIZE = 0,
+  SETCAMERAPOSITION,
+  SETWEAPONRPM,
+  SETTIMER,
+  CREATETARGET,
+  SETUPTARGET,
+  UPDATETARGET,
+  REMOVETARGET,
+  UPDATECAMERA,
+  PERFORMSHOT,
 }
-export interface ReplayEvent {
+interface ReplayEventData {
+  [ReplayEventEnum.SETROOMSIZE]: {
+    width: number;
+    length: number;
+    height: number;
+  };
+  [ReplayEventEnum.SETCAMERAPOSITION]: { x: number; y: number; z: number };
+  [ReplayEventEnum.SETWEAPONRPM]: { rpm: number };
+  [ReplayEventEnum.SETTIMER]: { seconds: number };
+  [ReplayEventEnum.CREATETARGET]: { id: number };
+  [ReplayEventEnum.SETUPTARGET]: {
+    id: number;
+    radius: number;
+    height: number;
+    position: { x: number; y: number; z: number };
+    maxHp: number;
+    hp: number;
+  };
+  [ReplayEventEnum.UPDATETARGET]: {
+    id: number;
+    position: { x: number; y: number; z: number };
+    hp: number;
+  };
+  [ReplayEventEnum.REMOVETARGET]: {
+    id: number;
+  };
+  [ReplayEventEnum.UPDATECAMERA]: {
+    position: {
+      x: number;
+      y: number;
+      z: number;
+    };
+    quaternion: {
+      x: number;
+      y: number;
+      z: number;
+      w: number;
+    };
+  };
+  [ReplayEventEnum.PERFORMSHOT]: {};
+}
+export interface ReplayEvent<K extends ReplayEventEnum = ReplayEventEnum> {
   elapsedTime: number;
-  event: ReplayEventEnum;
-  data?: any;
+  event: K;
+  data: ReplayEventData[K];
 }
 
 export class Game {
@@ -100,7 +153,72 @@ export class Game {
   });
 
   private replayLastCamEvent = 0;
-  private replayEvents: ReplayEvent[] = [];
+  private replayEvents: ReplayEvent<ReplayEventEnum>[] = [];
+  private replayEventsBinary: ArrayBuffer[] = [];
+
+  pushReplayEvent<K extends ReplayEventEnum>(
+    eventType: K,
+    data: ReplayEventData[K]
+  ): void {
+    this.replayEvents.push({
+      elapsedTime: this.elapsedTime,
+      event: eventType,
+      data: data,
+    });
+
+    switch (eventType) {
+      case ReplayEventEnum.SETROOMSIZE: {
+        const d = data as ReplayEventData[ReplayEventEnum.SETROOMSIZE];
+        const buffer = new ArrayBuffer(17);
+        const view = new DataView(buffer);
+        view.setFloat32(0, this.elapsedTime, false);
+        view.setUint8(4, eventType);
+        view.setFloat32(5, d.width);
+        view.setFloat32(9, d.length);
+        view.setFloat32(13, d.height);
+        this.replayEventsBinary.push(buffer);
+        break;
+      }
+      case ReplayEventEnum.SETCAMERAPOSITION: {
+        const d = data as ReplayEventData[ReplayEventEnum.SETCAMERAPOSITION];
+        const buffer = new ArrayBuffer(17);
+        const view = new DataView(buffer);
+        view.setFloat32(0, this.elapsedTime, false);
+        view.setUint8(4, eventType);
+        view.setFloat32(5, d.x, false);
+        view.setFloat32(9, d.y, false);
+        view.setFloat32(13, d.z, false);
+        this.replayEventsBinary.push(buffer);
+        break;
+      }
+      case ReplayEventEnum.SETWEAPONRPM: {
+        break;
+      }
+      case ReplayEventEnum.SETTIMER: {
+        break;
+      }
+      case ReplayEventEnum.CREATETARGET:
+      case ReplayEventEnum.SETUPTARGET:
+      case ReplayEventEnum.UPDATETARGET: {
+        const d = data as ReplayEventData[ReplayEventEnum.UPDATETARGET];
+        const buffer = new ArrayBuffer(13);
+        const view = new DataView(buffer);
+        view.setFloat32(0, this.elapsedTime, false);
+        view.setUint8(4, eventType);
+        view.setUint16(5, d.id, false);
+        view.setUint16(7, d.hp, false);
+        view.setFloat32(9, d.z, false);
+        this.replayEventsBinary.push(buffer);
+        break;
+      }
+      case ReplayEventEnum.REMOVETARGET:
+      case ReplayEventEnum.UPDATECAMERA: {
+        break;
+      }
+      case ReplayEventEnum.PERFORMSHOT:
+    }
+    this.replayEventsBinary.push();
+  }
 
   constructor(private controls: AimControls) {
     this.controls.setCamera(this.camera);
@@ -123,10 +241,10 @@ export class Game {
     this.gameConfig.roomSize.y = height;
     this.gameConfig.roomSize.z = length;
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.SETROOMSIZE,
-      data: { width, length, height },
+    this.pushReplayEvent(ReplayEventEnum.SETROOMSIZE, {
+      width,
+      length,
+      height,
     });
   }
 
@@ -135,31 +253,19 @@ export class Game {
     this.gameConfig.cameraPos.y = y;
     this.gameConfig.cameraPos.z = z;
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.SETCAMERAPOSITION,
-      data: { x, y, z },
-    });
+    this.pushReplayEvent(ReplayEventEnum.SETCAMERAPOSITION, { x, y, z });
   }
 
   setWeaponRPM(rpm: number) {
     this.gameConfig.bulletsPerMinute = rpm;
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.SETWEAPONRPM,
-      data: { rpm },
-    });
+    this.pushReplayEvent(ReplayEventEnum.SETWEAPONRPM, { rpm });
   }
 
   setTimer(seconds: number) {
     this.gameConfig.timer = seconds;
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.SETTIMER,
-      data: { seconds },
-    });
+    this.pushReplayEvent(ReplayEventEnum.SETTIMER, { seconds });
   }
 
   async setup(handlers: LuaHandlers) {
@@ -407,12 +513,17 @@ export class Game {
     // only record camera events at 60 fps
     if (this.replayLastCamEvent < this.elapsedTime - 1 / 60) {
       this.replayLastCamEvent = this.elapsedTime;
-      this.replayEvents.push({
-        elapsedTime: this.elapsedTime,
-        event: ReplayEventEnum.UPDATECAMERA,
-        data: {
-          position: this.camera.position.clone(),
-          quaternion: this.camera.quaternion.clone(),
+      this.pushReplayEvent(ReplayEventEnum.UPDATECAMERA, {
+        position: {
+          x: this.camera.position.x,
+          y: this.camera.position.y,
+          z: this.camera.position.z,
+        },
+        quaternion: {
+          x: this.camera.quaternion.x,
+          y: this.camera.quaternion.y,
+          z: this.camera.quaternion.z,
+          w: this.camera.quaternion.w,
         },
       });
     }
@@ -463,11 +574,7 @@ export class Game {
     const target = new Target(this, forceId);
     this.addTarget(target);
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.CREATETARGET,
-      data: { id: target.id },
-    });
+    this.pushReplayEvent(ReplayEventEnum.CREATETARGET, { id: target.id });
 
     return target.id;
   }
@@ -491,17 +598,13 @@ export class Game {
     const position = new Vector3(posX, posY, posZ);
     target.setup(radius, height, position, maxHp, hp);
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.SETUPTARGET,
-      data: {
-        id: target.id,
-        radius,
-        height,
-        position: position.clone(),
-        maxHp,
-        hp,
-      },
+    this.pushReplayEvent(ReplayEventEnum.SETUPTARGET, {
+      id: target.id,
+      radius,
+      height,
+      position: { x: posX, y: posY, z: posZ },
+      maxHp,
+      hp,
     });
   }
 
@@ -521,10 +624,10 @@ export class Game {
     const position = new Vector3(posX, posY, posZ);
     target.update(position, hp);
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.UPDATETARGET,
-      data: { id: targetId, position: position.clone(), hp },
+    this.pushReplayEvent(ReplayEventEnum.UPDATETARGET, {
+      id: targetId,
+      position: { x: position.x, y: position.y, z: position.z },
+      hp,
     });
   }
 
@@ -535,11 +638,7 @@ export class Game {
   removeTarget(target: Target) {
     this.targetsToRemove.push(target);
 
-    this.replayEvents.push({
-      elapsedTime: this.elapsedTime,
-      event: ReplayEventEnum.REMOVETARGET,
-      data: { id: target.id },
-    });
+    this.pushReplayEvent(ReplayEventEnum.REMOVETARGET, { id: target.id });
   }
 
   addScore(add: number) {
@@ -581,11 +680,8 @@ export class Game {
   performReplayEvent(event: ReplayEvent) {
     switch (event.event) {
       case ReplayEventEnum.SETROOMSIZE:
-        this.setRoomSize(
-          event.data.width,
-          event.data.length,
-          event.data.height
-        );
+        const data = (event as ReplayEvent<ReplayEventEnum.SETROOMSIZE>).data;
+        this.setRoomSize(data.width, data.length, data.height);
         break;
       case ReplayEventEnum.SETCAMERAPOSITION:
         this.setCameraPosition(event.data.x, event.data.y, event.data.z);
