@@ -48,9 +48,13 @@ export class Target extends GameObject {
   // private changeDirectionCooldown?: number;
   // private lastChangeDirectionTimestamp = 0;
 
-  constructor(game: Game) {
+  constructor(game: Game, forceId?: number) {
     const mesh = new Mesh(undefined, MATERIALS.get(MATERIAL_IDS.TARGET));
     super(game, mesh);
+
+    if (forceId) {
+      this.id = forceId;
+    }
   }
 
   setup(
