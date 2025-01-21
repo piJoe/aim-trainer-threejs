@@ -303,7 +303,7 @@ export class Game {
           (this.ttkList.reduce((t, ttk) => (t += ttk), 0) /
             this.ttkList.length) *
             100
-        ) / 100
+        ) / 100 || 0
       );
       this.controls.unlock();
       m.redraw();
