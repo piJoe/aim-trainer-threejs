@@ -17,6 +17,7 @@ import { LuaHandlers } from "./luaScenario";
 import { MATERIAL_IDS, MATERIALS } from "./asset-loader";
 import { audioHandler } from "src/ts/audio";
 import { map } from "nanostores";
+import { DeathReason } from "src/ts/game-objects/game-object";
 
 interface GameStore {
   score: number;
@@ -89,6 +90,8 @@ export class Game {
       createTarget: this.createTarget.bind(this),
       setupTarget: this.setupTarget.bind(this),
       updateTarget: this.updateTarget.bind(this),
+      despawnTarget: this.despawnTarget.bind(this),
+      addScore: this.addScore.bind(this),
       setRoomSize: this.setRoomSize.bind(this),
       setCameraPosition: this.setCameraPosition.bind(this),
       setWeaponRPM: this.setWeaponRPM.bind(this),
@@ -330,17 +333,17 @@ export class Game {
       target.onTick(elapsedTime, delta);
     }
 
-    this.targetsToRemove.forEach((target) => {
-      this.targets.delete(target.id);
-      target.removeObjectFromParent(this.scene);
-    });
-    this.targetsToRemove = [];
-
     for (const target of this.targetsToAdd) {
       target.addObjectToParent(this.scene);
       this.targets.set(target.id, target);
     }
     this.targetsToAdd = [];
+
+    this.targetsToRemove.forEach((target) => {
+      this.targets.delete(target.id);
+      target.removeObjectFromParent(this.scene);
+    });
+    this.targetsToRemove = [];
   }
 
   // TODO: decouple physics tick from rendering, use interpolation
@@ -391,6 +394,16 @@ export class Game {
     target.update(new Vector3(posX, posY, posZ), hp);
   }
 
+  despawnTarget(targetId: number) {
+    const target = this.findTargetById(targetId);
+    if (!target) {
+      console.error("somehow target does not exist");
+      return;
+    }
+
+    target.destroy(DeathReason.DESPAWN);
+  }
+
   addTarget(target: Target) {
     this.targetsToAdd.push(target);
   }
@@ -399,8 +412,8 @@ export class Game {
     this.targetsToRemove.push(target);
   }
 
-  addScore(add: number) {
-    this.gameStore.setKey("score", this.gameStore.get().score + add);
+  addScore(points: number) {
+    this.gameStore.setKey("score", this.gameStore.get().score + points);
   }
 
   addTTK() {

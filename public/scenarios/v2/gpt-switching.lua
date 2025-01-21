@@ -29,9 +29,9 @@ function spawnCustomTarget()
         position = { x = randomFloat(-4, 4), y = randomFloat(-2, 2), z = randomFloat(-2, 2) },
         hp = 1,
         onTick = createMovement(),
-        onDeath = function()
+        onAfterDeath = function()
             spawnCustomTarget()
-        end,
+        end
     })
 end
 

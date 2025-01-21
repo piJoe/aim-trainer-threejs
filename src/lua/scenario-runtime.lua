@@ -21,6 +21,7 @@ function TargetManager.addTarget(config)
         hp = config.hp or 1,
         onTick = config.onTick,
         onDeath = config.onDeath,
+        onAfterDeath = config.onAfterDeath,
         onHit = config.onHit,
     }
 
@@ -45,6 +46,10 @@ function TargetManager.addTarget(config)
 
     function target:addHP(add)
         self.hp = self.hp + add
+    end
+
+    function target:despawn()
+        __js_calls.despawnTarget(target.id)
     end
 end
 
@@ -79,12 +84,21 @@ function TargetManager.updateTarget(target)
 end
 
 -- Handler for js side
-function __fromjs.handleDeath(targetId)
+function __fromjs.handleDeath(targetId, reason)
     local target = targets[targetId]
     if target then
         if target.onDeath then
-            target:onDeath()
+            target:onDeath(reason)
+        else
+            if reason == "killed" then
+                __js_calls.addScore(1)
+            end
         end
+
+        if target.onAfterDeath then
+            target:onAfterDeath()
+        end
+
         TargetManager.removeTarget(targetId)
     end
 end
@@ -105,6 +119,7 @@ function __fromjs.handleTick(elapsed, delta)
     -- if onUpdate then
     --     onUpdate(elapsed, delta)
     -- end
+    --
     for _, target in pairs(targets) do
         if target.onTick then
             target:onTick(elapsed, delta)
@@ -123,6 +138,10 @@ end
 local SafeAPI = {}
 function SafeAPI.spawnTarget(config)
     TargetManager.addTarget(config)
+end
+
+function SafeAPI.addScore(points)
+    __js_calls.addScore(points)
 end
 
 -- TODO: expose createWall method to __js_calls to allow for more creative room layouts by setting walls manually in scenario code

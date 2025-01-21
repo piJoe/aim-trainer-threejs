@@ -1,11 +1,12 @@
 import { LuaEngine, LuaFactory } from "wasmoon";
 import luaScenarioRuntime from "src/lua/scenario-runtime.lua?raw";
 import luaGlueWasmUrl from "wasmoon/dist/glue.wasm?url";
+import { DeathReason } from "src/ts/game-objects/game-object";
 
 export interface LuaHandlers {
   handleInit: () => void;
   handleTick: (elapsedTime: number, delta: number) => void;
-  handleDeath: (targetId: number) => void;
+  handleDeath: (targetId: number, reason: DeathReason) => void;
   handleTargetHit: (targetId: number) => void;
 }
 

@@ -30,9 +30,14 @@ function spawnCustomTarget()
         position = { x = randomFloat(-4, 4), y = randomFloat(-2, 2), z = randomFloat(-2, 2) },
         hp = 10,
         onTick = createMovement(),
-        onDeath = function()
-            spawnCustomTarget()
+        onDeath = function(self, reason)
+            if reason == "killed" then
+                addScore(10)
+            end
         end,
+        onAfterDeath = function()
+            spawnCustomTarget()
+        end
     })
 end
 

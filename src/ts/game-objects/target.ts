@@ -10,7 +10,7 @@ import {
   Box3,
   EquirectangularReflectionMapping,
 } from "three";
-import { GameObject } from "./game-object";
+import { DeathReason, GameObject } from "./game-object";
 import { Game } from "../game";
 import { MATERIAL_IDS, MATERIALS } from "../asset-loader";
 
@@ -118,17 +118,18 @@ export class Target extends GameObject {
   //   );
   // }
 
-  destroy() {
+  destroy(reason: DeathReason) {
     if (this.isDestroyed) {
       return;
     }
 
-    this.game.handlers?.handleDeath(this.id);
-    this.game.addScore(this.maxHP);
-    this.game.addTTK();
+    this.game.handlers?.handleDeath(this.id, reason);
+    if (reason === DeathReason.KILLED) {
+      this.game.addTTK();
+      this.game.audioHandler.playKill();
+    }
     this.game.removeTarget(this);
-    this.game.audioHandler.playKill();
-    super.destroy();
+    super.destroy(reason);
   }
 
   onHit() {
@@ -144,41 +145,11 @@ export class Target extends GameObject {
     }
 
     if (this.hp <= 0) {
-      this.destroy();
+      this.destroy(DeathReason.KILLED);
     }
   }
 
   onTick(elapsedTime: number, delta: number) {
-    // if (this.movementStrategy === MovementStrategy.LINEAR) {
-    //   // do linear movement
-    //   if (
-    //     elapsedTime >
-    //     this.lastChangeDirectionTimestamp + this.changeDirectionCooldown!
-    //   ) {
-    //     const change =
-    //       Math.random() <=
-    //       (this.changeDirectionChance! * delta) / this.changeDirectionCooldown!;
-    //     if (change) {
-    //       this.movementDirection!.multiplyScalar(-1);
-    //       this.lastChangeDirectionTimestamp = elapsedTime;
-    //     }
-    //   }
-    //   const scaledVel = this.movementVelocity!.clone()
-    //     .multiply(this.movementDirection!)
-    //     .multiplyScalar(delta);
-
-    //   this.mesh.position.add(scaledVel);
-    //   if (!this.movementBoundingBox?.containsPoint(this.mesh.position)) {
-    //     // force direction change on hitting bounding box and reset cooldown as grace period
-    //     this.movementDirection!.multiplyScalar(-1);
-    //     this.lastChangeDirectionTimestamp = elapsedTime;
-    //     this.movementBoundingBox?.clampPoint(
-    //       this.mesh.position,
-    //       this.mesh.position
-    //     );
-    //   }
-    // }
-
     if (this.hpBar && this.hp < this.maxHP) {
       this.hpBar.parent!.visible = true;
       this.hpBar.parent!.lookAt(this.game.cameraPosition);

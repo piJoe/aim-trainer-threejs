@@ -2,6 +2,11 @@ import { Mesh, Object3D, Raycaster } from "three";
 import { Game } from "../game";
 let objectIdCounter = 0;
 
+export enum DeathReason {
+  KILLED = "killed",
+  DESPAWN = "despawn",
+}
+
 export abstract class GameObject {
   public id = objectIdCounter++;
   protected mesh: Mesh;
@@ -11,7 +16,7 @@ export abstract class GameObject {
     this.mesh = mesh;
   }
 
-  public destroy() {
+  public destroy(reason: DeathReason) {
     if (this.isDestroyed) {
       return;
     }
