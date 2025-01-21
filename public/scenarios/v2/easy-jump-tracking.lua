@@ -22,6 +22,8 @@ end
 
 -- Abstracted Target Spawning Function
 function spawnCustomTarget()
+    local time = -0.3
+
     spawnTarget({
         size = { radius = 0.16, height = 0.09 },
         position = { x = 0, y = -4.8, z = -2.8 },
@@ -30,9 +32,19 @@ function spawnCustomTarget()
             addScore(1)
         end,
         onTick = function(self, elapsed, dt)
+            time = time + dt
             local height = 6
             local duration = 2
-            local t = (elapsed % duration) / duration
+            local t = time / duration
+
+            if t < 0 then
+                return
+            end
+            if t >= 1 then
+                self.position.y = -4.8
+                time = 0
+                return
+            end
 
             local jumpOffset = height * 4 * t * (1 - t) -- Parabolic jump formula
             self.position.y = self.position.y + jumpOffset -
