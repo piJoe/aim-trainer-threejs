@@ -1,7 +1,10 @@
 import { LuaEngine, LuaFactory } from "wasmoon";
-import luaScenarioRuntime from "src/lua/scenario-runtime.lua?raw";
 import luaGlueWasmUrl from "wasmoon/dist/glue.wasm?url";
 import { DeathReason } from "src/ts/game-objects/game-object";
+
+import luaScenarioRuntime from "src/lua/scenario-runtime.lua?raw";
+import luaHelperMovement from "src/lua/helper/movement.lua?raw";
+import luaHelperRandom from "src/lua/helper/random.lua?raw";
 
 export interface LuaHandlers {
   handleInit: () => void;
@@ -14,6 +17,11 @@ let luaInstance: LuaEngine;
 
 async function setupLua() {
   const factory = new LuaFactory(luaGlueWasmUrl);
+
+  // setup modules
+  await factory.mountFile("helper/movement.lua", luaHelperMovement);
+  await factory.mountFile("helper/random.lua", luaHelperRandom);
+
   const lua = await factory.createEngine({
     injectObjects: false,
     enableProxy: false,

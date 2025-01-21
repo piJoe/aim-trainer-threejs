@@ -134,6 +134,18 @@ export class ChooseScreen
               scenarioUrl="/scenarios/v2/gpt-tracking.lua"
               type={ScenarioType.TRACKING}
             />
+            <ScenarioCard
+              title="Easy Jump Tracking"
+              author="Admin"
+              scenarioUrl="/scenarios/v2/easy-jump-tracking.lua"
+              type={ScenarioType.TRACKING}
+            />
+            <ScenarioCard
+              title="Easy Horizontal Tracking"
+              author="Admin"
+              scenarioUrl="/scenarios/v2/easy-horizontal-tracking.lua"
+              type={ScenarioType.TRACKING}
+            />
           </div>
         </div>
         <div class="flex flex-row items-end w-full">

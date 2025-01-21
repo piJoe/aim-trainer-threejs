@@ -6,9 +6,7 @@ Description: A scenario with predefined movement patterns for training target sw
 Version: 2.0
 ]]
 
-local function randomFloat(min, max)
-    return min + math.random() * (max - min)
-end
+local Random = require('helper/random')
 
 -- Scenario Configuration
 function onInit()
@@ -26,7 +24,7 @@ end
 function spawnCustomTarget()
     spawnTarget({
         size = { radius = 0.12, height = 0.05 },
-        position = { x = randomFloat(-4, 4), y = randomFloat(-2, 2), z = randomFloat(-2, 2) },
+        position = { x = Random.randomFloat(-4, 4), y = Random.randomFloat(-2, 2), z = Random.randomFloat(-2, 2) },
         hp = 1,
         onTick = createMovement(),
         onAfterDeath = function()
@@ -36,12 +34,12 @@ function spawnCustomTarget()
 end
 
 function createMovement()
-    local amplitude = randomFloat(0.5, 2)            -- Movement amplitude (distance covered)
-    local amplitudeY = randomFloat(0.2, 0.5)         -- Movement amplitude (distance covered)
-    local frequency = randomFloat(2, 2.5)            -- Movement frequency
-    local frequencyY = randomFloat(2.5, 3.5)         -- Movement frequency
+    local amplitude = Random.randomFloat(0.5, 2)     -- Movement amplitude (distance covered)
+    local amplitudeY = Random.randomFloat(0.2, 0.5)  -- Movement amplitude (distance covered)
+    local frequency = Random.randomFloat(2, 2.5)     -- Movement frequency
+    local frequencyY = Random.randomFloat(2.5, 3.5)  -- Movement frequency
     local randomOffset = math.random() * 2 * math.pi -- Randomize start position
-    local directionChangeInterval = randomFloat(0.5, 1.5)
+    local directionChangeInterval = Random.randomFloat(0.5, 1.5)
     local lastDirectionChangeTime = 0
     local direction = math.pi / 2
 

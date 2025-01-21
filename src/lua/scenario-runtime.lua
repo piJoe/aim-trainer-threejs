@@ -6,6 +6,7 @@ local __fromjs = {}
 
 -- setup initial user scenario env
 local userScenarioEnv = {
+    onTick = nil,
     onInit = nil,
 }
 
@@ -116,10 +117,10 @@ function __fromjs.handleTargetHit(targetId)
 end
 
 function __fromjs.handleTick(elapsed, delta)
-    -- if onUpdate then
-    --     onUpdate(elapsed, delta)
-    -- end
-    --
+    if userScenarioEnv.onTick then
+        userScenarioEnv.onTick(elapsed, delta)
+    end
+
     for _, target in pairs(targets) do
         if target.onTick then
             target:onTick(elapsed, delta)
@@ -169,13 +170,14 @@ end
 
 -- put safe globals into user scenario env
 for k, v in pairs(_G) do
-    if k == "math" or k == "table" or k == "string" or k == "pairs" or k == "ipairs" or k == "print" then
+    if k == "math" or k == "table" or k == "string" or k == "pairs" or k == "ipairs" or k == "print" or k == "require" then
         userScenarioEnv[k] = v
     end
 end
 
 local function executeUserScenario(jsCalls, scenarioCode)
     __js_calls = jsCalls
+
     local userScenario, err = load(scenarioCode, nil, 't', userScenarioEnv)
     if err then
         print(err)

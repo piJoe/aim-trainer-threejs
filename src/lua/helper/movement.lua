@@ -1,5 +1,4 @@
 --- Movement patterns module for objects with position and onTick updates
-
 local MovementPatterns = {}
 
 -- Linear movement to a target position at a specific speed
@@ -85,13 +84,34 @@ end
 
 -- Zig-zag movement along a direction with zig size and speed
 function MovementPatterns.zigzag(direction, zigSize, zigSpeed)
-    local time = 0
+    local zigCycleDuration = zigSize / zigSpeed
+    local time = zigCycleDuration / 2
+    local originalPos = nil
+    local zigDir = 1 -- Current direction of zigzag (-1 or 1)
+
     return function(obj, dt)
+        if not originalPos then
+            -- Record the starting position as the center of the zigzag
+            originalPos = { x = obj.x, y = obj.y, z = obj.z }
+        end
+
         time = time + dt
-        local factor = math.floor(time * zigSpeed) % 2 == 0 and 1 or -1
-        obj.x = obj.x + direction.x * zigSize * factor * dt
-        obj.y = obj.y + direction.y * zigSize * factor * dt
-        obj.z = obj.z + direction.z * zigSize * factor * dt
+
+        -- Calculate how far along the zigzag cycle we are
+        local cycleProgress = (time % zigCycleDuration) / zigCycleDuration
+
+        -- Flip direction at each cycle boundary
+        if cycleProgress < dt / zigCycleDuration then
+            zigDir = -zigDir
+        end
+
+        -- Move in the zigzag direction
+        local moveAmount = zigDir * zigSpeed * dt
+
+        obj.x = obj.x + direction.x * moveAmount
+        obj.y = obj.y + direction.y * moveAmount
+        obj.z = obj.z + direction.z * moveAmount
+
         return false -- Always ongoing
     end
 end
@@ -153,7 +173,6 @@ end
 -- Combine multiple movement patterns to run simultaneously
 function MovementPatterns.combine(movements)
     return function(obj, dt)
-        local completed = true
         for _, move in ipairs(movements) do
             if move(obj, dt) then
                 return true
@@ -178,3 +197,5 @@ function MovementPatterns.chain(movements)
         return false -- Chain ongoing
     end
 end
+
+return MovementPatterns
