@@ -42,10 +42,10 @@ export class FinalScoreScreen
           </div>
           <div class="flex flex-row text-3xl font-medium gap-8">
             <div>
-              Avg TTK: <span class="font-semibold">{state?.avgTTK}s</span>
+              Avg TTK:&nbsp;<span class="font-semibold">{state?.avgTTK}s</span>
             </div>
             <div>
-              Accuracy:{" "}
+              Accuracy:&nbsp;
               <span class="font-semibold">
                 {(
                   ((state?.shotsHit ?? 1) / (state?.totalShots ?? 1)) *
@@ -55,16 +55,12 @@ export class FinalScoreScreen
               </span>
             </div>
           </div>
-          {/* <div class="">
-            Scenario:{" "}
-            <span>
-              {(
-                ((state?.shotsHit ?? 1) / (state?.totalShots ?? 1)) *
-                100
-              ).toFixed(2)}
-              %
+          <div class="flex flex-row text-2xl font-medium">
+            Scenario:&nbsp;
+            <span class="font-semibold">
+              {vnode.attrs.ingameScreen.scenarioTitle}
             </span>
-          </div> */}
+          </div>
         </div>
         <div class="flex flex-row items-end w-full">
           <ul class="ml-auto text-xl flex flex-row gap-5">
