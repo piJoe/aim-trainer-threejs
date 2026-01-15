@@ -120,7 +120,7 @@ export class ChooseScreen
   view() {
     return (
       <div class="h-full bg-purple-flash flex items-center justify-center flex-col gap-5 p-16">
-        <div class="relative w-full my-auto py-14">
+        <div class="relative w-full my-auto py-14 overflow-x-auto">
           {/* scrolling container */}
           <div class="flex flex-row gap-10 w-fit px-10 mx-auto">
             <ScenarioCard
@@ -149,9 +149,9 @@ export class ChooseScreen
             />
           </div>
           {/* scrollbar */}
-          <div class="absolute bottom-4 h-2 w-full bg-white/30 rounded">
+          {/*           <div class="absolute bottom-4 h-2 w-full bg-white/30 rounded">
             <div class="bg-white h-2 rounded"></div>
-          </div>
+          </div> */}
         </div>
         <div class="flex flex-row items-end w-full">
           <ul class="ml-auto text-xl flex flex-row gap-5">
