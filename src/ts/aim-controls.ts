@@ -23,14 +23,13 @@ export class AimControls {
   private maxPolarAngle = Math.PI;
   private euler = new Euler(0, 0, 0, "YXZ");
   private mouseSensitivity = userMouseSettingsSensC.get();
+  private pointerUpdateEvent: EventListener;
+  private useRegularPointerEvents = false;
+  private mouseMoveLast5Ticks: number[] = [];
   private clickEventQueue: ClickEvent[] = [];
   private mouseDown = false;
 
   constructor(private domElement: HTMLElement) {
-    document.addEventListener(
-      "pointerrawupdate",
-      this.onPointerRawEvent.bind(this) as EventListener
-    );
     document.addEventListener(
       "pointerlockchange",
       this.onPointerLockChange.bind(this) as EventListener
@@ -41,6 +40,16 @@ export class AimControls {
     );
     document.addEventListener("pointerup", this.onPointerUpEvent.bind(this));
 
+    this.pointerUpdateEvent = this.onPointerUpdateEvent.bind(
+      this
+    ) as EventListener;
+
+    if (this.useRegularPointerEvents) {
+      document.addEventListener("pointermove", this.pointerUpdateEvent);
+    } else {
+      document.addEventListener("pointerrawupdate", this.pointerUpdateEvent);
+    }
+
     userMouseSettingsSensC.subscribe((sens) => {
       this.mouseSensitivity = sens;
     });
@@ -50,10 +59,33 @@ export class AimControls {
     this.camera = camera;
   }
 
-  onPointerRawEvent(event: PointerEvent) {
-    if (!this.isLocked || !this.camera) return;
-
+  onPointerUpdateEvent(event: PointerEvent) {
     const { movementX, movementY } = event;
+
+    // check if mouse movement (movementX/Y non zero) gets picked up by the event handler (firefox 140 bug)
+    if (!this.useRegularPointerEvents) {
+      this.mouseMoveLast5Ticks.push(Math.abs(movementX) + Math.abs(movementY));
+      if (this.mouseMoveLast5Ticks.length > 5) {
+        this.mouseMoveLast5Ticks.shift();
+        const calcTotalMove = this.mouseMoveLast5Ticks.reduce(
+          (total, move) => (total += move),
+          0
+        );
+        if (calcTotalMove < 1) {
+          console.log("swichting to use legacy mouse events");
+          // zero movement detected in lasts 5 events, auto-change to use regular input events
+          this.useRegularPointerEvents = true;
+
+          document.removeEventListener(
+            "pointerrawupdate",
+            this.pointerUpdateEvent
+          );
+          document.addEventListener("pointermove", this.pointerUpdateEvent);
+        }
+      }
+    }
+
+    if (!this.isLocked || !this.camera) return;
 
     this.euler.setFromQuaternion(this.camera?.quaternion);
 
